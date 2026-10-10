@@ -60,7 +60,7 @@ input[type=range]{accent-color:#0A7F60;}
     
   </div>
 
-  <div style="margin-top:28px;font-family:Pretendard,Archivo,sans-serif;font-size:28px;font-weight:800;line-height:1.4;letter-spacing:-.02em;text-wrap:balance;">일상의 식재료를 주식처럼 스마트하게.<br>Heat Exchange에서 새로운 거래의 즐거움을 경험해 보세요.</div>
+  <div style="margin-top:28px;font-family:Pretendard,Archivo,sans-serif;font-size:28px;font-weight:800;line-height:1.4;letter-spacing:-.02em;text-wrap:balance;">일상의 식재료를 주식처럼 스마트하게.<br><span style="color:#1FBF92;">Heat Exchange</span>에서 새로운 거래의 즐거움을 경험해 보세요.</div>
   <div style="margin-top:28px;font-family:Pretendard,sans-serif;font-size:16px;font-weight:700;color:#3A4541;">작물 가격 실시간 변동</div>
   <div style="margin-top:10px;overflow:hidden;border-top:1px solid #D3D9D7;border-bottom:1px solid #D3D9D7;padding:13px 0;">
       <div style="display:flex;gap:36px;width:max-content;animation:hxTicker 140s linear infinite;font-size:16px;">
@@ -153,7 +153,10 @@ input[type=range]{accent-color:#0A7F60;}
         <div style="position:relative;height:96px;">
           <div style="position:absolute;inset:0;border-radius:10px;background:#5FE3BE;opacity:{{ heatOpacity }};transition:opacity 1.2s;"></div>
           <svg width="720" height="96" style="position:absolute;inset:0;overflow:visible;"><path d="{{ heatLine }}" style="fill:none;stroke:#121816;stroke-width:2;stroke-linejoin:round;"></path></svg>
+          <div style="position:absolute;right:6px;top:4px;padding:1px 6px;border-radius:5px;background:rgba(251,252,252,.75);font-size:12px;font-weight:600;color:#3A4541;">1,240 kW</div>
+          <div style="position:absolute;right:6px;bottom:4px;padding:1px 6px;border-radius:5px;background:rgba(251,252,252,.75);font-size:12px;font-weight:600;color:#3A4541;">0 kW</div>
         </div>
+        <div style="display:flex;justify-content:space-between;margin-top:-8px;font-family:Pretendard,sans-serif;font-size:13px;color:#5B6662;"><span>2분 전</span><span>1분 전</span><span>지금</span></div>
         <div style="display:flex;gap:28px;font-family:Pretendard,sans-serif;font-size:15px;color:#3A4541;">
           <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#E0892E;"></div><b>고온 작물</b> 폐열 증가 시 공급↑ 가격↓</div>
           <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#4E9F5E;"></div><b>저온 작물</b> 폐열 증가 시 공급↓ 가격↑</div>
