@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>CORE45 Heat Exchange</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Heat Exchange">
+<meta name="theme-color" content="#F2F4F3">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap">
+<style>
+html,body{margin:0;padding:0;background:#DDE1DF;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;}
+a{color:#0A7F60;text-decoration:none;}a:hover{color:#075E47;}
+button{font-family:inherit;color:inherit;}
+::selection{background:#BFF3E2;color:#121816;}
+:focus-visible{outline:2px solid #0A7F60;outline-offset:2px;}
+*::-webkit-scrollbar{display:none;}
+input[type=range]{accent-color:#0A7F60;}
+@keyframes hxDriftA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(220px,90px) scale(1.25)}}
+@keyframes hxDriftB{0%,100%{transform:translate(0,0) scale(1.1)}50%{transform:translate(-200px,-60px) scale(.85)}}
+@keyframes hxDriftC{0%,100%{transform:translate(0,0) scale(.9)}50%{transform:translate(120px,-140px) scale(1.2)}}
+@keyframes hxBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+@keyframes hxRing{0%{transform:scale(.8);opacity:.7}100%{transform:scale(2.4);opacity:0}}
+@keyframes hxDash{to{stroke-dashoffset:-40}}
+@keyframes hxSpin{to{transform:rotate(360deg)}}
+@keyframes hxPop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes hxDraw{from{stroke-dashoffset:120}to{stroke-dashoffset:0}}
+@keyframes hxUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes hxRise{from{transform:translateY(120%)}to{transform:translateY(0)}}
+@keyframes hxBlink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes hxFade{from{opacity:0}to{opacity:1}}
+@keyframes hxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(.3);opacity:0}}
+@keyframes hxTicker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+</helmet>
+<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#E4E7E6;overflow:hidden;">
+<div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:22px;transform:scale({{ scale }});transform-origin:center;">
+<div style="position:relative;padding:{{ bezel }}px;border-radius:{{ devR }}px;background:#232726;box-shadow:{{ devShadow }};">
+<sc-if value="{{ showDevice }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:50%;top:12px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#0E1110;box-shadow:inset 0 0 0 2px #2E3433;"></div></sc-if>
+<div ref="{{ frameRef }}" onPointerDown="{{ onFrameDown }}" style="position:relative;flex:none;width:834px;height:1194px;border-radius:{{ scrR }}px;overflow:hidden;background:#F2F4F3;color:#121816;font-family:Archivo,Pretendard,-apple-system,sans-serif;font-variant-numeric:tabular-nums;">
+
+<!-- ============ INTRO ============ -->
+<sc-if value="{{ isIntro }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="01 Intro" style="position:absolute;inset:0;background:#F2F4F3;display:flex;flex-direction:column;padding:40px;box-sizing:border-box;overflow:hidden;">
+  <div style="display:flex;justify-content:space-between;align-items:center;height:48px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <div style="font-family:Archivo,sans-serif;font-stretch:125%;font-weight:800;font-size:22px;letter-spacing:.02em;">CORE45</div>
+      
+    </div>
+    
+  </div>
+
+  <div style="margin-top:28px;font-family:Pretendard,Archivo,sans-serif;font-size:28px;font-weight:800;line-height:1.4;letter-spacing:-.02em;text-wrap:balance;">일상의 식재료를 주식처럼 스마트하게.<br>Heat Exchange에서 새로운 거래의 즐거움을 경험해 보세요.</div>
+  <div style="margin-top:28px;font-family:Pretendard,sans-serif;font-size:16px;font-weight:700;color:#3A4541;">작물 가격 실시간 변동</div>
+  <div style="margin-top:10px;overflow:hidden;border-top:1px solid #D3D9D7;border-bottom:1px solid #D3D9D7;padding:13px 0;">
+      <div style="display:flex;gap:36px;width:max-content;animation:hxTicker 140s linear infinite;font-size:16px;">
+        <sc-for list="{{ tickerItems }}" as="tk" hint-placeholder-count="0">
+          <div style="display:flex;gap:8px;white-space:nowrap;"><span style="font-family:Pretendard,sans-serif;font-weight:600;">{{ tk.name }}</span><span style="color:#3A4541;">{{ tk.price }}</span><span style="color:{{ tk.color }};">{{ tk.chg }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position:relative;margin-top:28px;flex:1;min-height:0;border-radius:16px;background:#F4F6F5;border:1px solid #D3D9D7;box-shadow:inset 0 1px 0 #fff,0 24px 48px -28px rgba(20,32,28,.35);overflow:hidden;">
+    <div style="position:absolute;inset:28px;border-radius:8px;background:#E6ECEA;overflow:hidden;-webkit-mask-image:radial-gradient(circle,#000 0 3.2px,transparent 3.8px);mask-image:radial-gradient(circle,#000 0 3.2px,transparent 3.8px);-webkit-mask-size:15px 15px;mask-size:15px 15px;">
+      <div style="position:absolute;left:-80px;top:40px;width:460px;height:460px;border-radius:50%;background:#3DDCB0;animation:hxDriftA 16s ease-in-out infinite;"></div>
+      <div style="position:absolute;right:-60px;top:-80px;width:420px;height:420px;border-radius:50%;background:#A9F1DB;animation:hxDriftB 19s ease-in-out infinite;"></div>
+      <div style="position:absolute;left:240px;bottom:-160px;width:400px;height:400px;border-radius:50%;background:#14A97F;animation:hxDriftC 13s ease-in-out infinite;"></div>
+      
+    </div>
+    <div style="position:absolute;left:12px;top:12px;width:8px;height:8px;border-radius:50%;background:#D3D9D7;box-shadow:inset 0 1px 1px rgba(0,0,0,.25);"></div>
+    <div style="position:absolute;right:12px;top:12px;width:8px;height:8px;border-radius:50%;background:#D3D9D7;box-shadow:inset 0 1px 1px rgba(0,0,0,.25);"></div>
+    <div style="position:absolute;left:12px;bottom:12px;width:8px;height:8px;border-radius:50%;background:#D3D9D7;box-shadow:inset 0 1px 1px rgba(0,0,0,.25);"></div>
+    <div style="position:absolute;right:12px;bottom:12px;width:8px;height:8px;border-radius:50%;background:#D3D9D7;box-shadow:inset 0 1px 1px rgba(0,0,0,.25);"></div>
+    <div style="position:absolute;left:44px;bottom:44px;display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 6px 16px -10px rgba(20,32,28,.35);">
+      <div style="font-size:14px;color:#5B6662;">IDC 2F–4F 배기열</div>
+      <div style="font-size:20px;font-weight:600;">{{ heatKw }} kW</div>
+      <div style="width:1px;height:20px;background:#D3D9D7;"></div>
+      <div style="font-size:14px;color:#5B6662;">AI 부하</div>
+      <div style="font-size:20px;font-weight:600;color:#0A7F60;">{{ aiLoad }}%</div>
+    </div>
+  </div>
+
+  
+  <button onClick="{{ startExp }}" style="position:relative;flex:none;margin-top:28px;height:96px;border:none;border-radius:16px;background:rgba(95,227,190,.86);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -6px 14px -6px rgba(10,127,96,.35),0 12px 28px -14px rgba(10,127,96,.55);color:#08281E;display:flex;align-items:center;justify-content:space-between;padding:0 32px;cursor:pointer;animation:hxBreath 3s ease-in-out infinite;" style-active="transform:scale(.99);">
+      <span style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;"><span style="font-family:Pretendard,sans-serif;font-size:26px;font-weight:800;">체험 시작하기</span><span style="font-size:15px;font-weight:500;">Tap to start</span></span>
+      <svg width="32" height="32"><path d="M6 16 H26 M18 8 L26 16 L18 24" style="fill:none;stroke:#08281E;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"></path></svg>
+    </button>
+
+
+  <sc-if value="{{ creditModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(30,40,36,.38);display:flex;align-items:center;justify-content:center;animation:hxFade .25s ease;">
+      <div style="width:540px;background:#FBFCFC;border:1px solid #D3D9D7;border-radius:16px;padding:44px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;box-shadow:0 30px 60px -24px rgba(20,32,28,.45);animation:hxUp .45s cubic-bezier(.16,1,.3,1);">
+        <div style="position:relative;width:120px;height:120px;margin-bottom:8px;">
+          <sc-for list="{{ burst }}" as="b" hint-placeholder-count="0">
+            <div style="position:absolute;left:54px;top:54px;width:12px;height:12px;border-radius:50%;background:{{ b.c }};--bx:{{ b.x }}px;--by:{{ b.y }}px;animation:hxBurst 1s cubic-bezier(.16,1,.3,1) .2s both;"></div>
+          </sc-for>
+          <div style="position:absolute;inset:0;border-radius:50%;background:#5FE3BE;display:flex;align-items:center;justify-content:center;font-stretch:125%;font-size:30px;font-weight:800;color:#08281E;animation:hxPop .5s cubic-bezier(.16,1,.3,1) both;">HC</div>
+        </div>
+        <div style="font-family:Pretendard,sans-serif;font-size:36px;font-weight:800;letter-spacing:-.02em;">{{ creditStart }} HC가 지급되었어요</div>
+        <div style="font-family:Pretendard,sans-serif;font-size:18px;color:#5B6662;line-height:1.6;">서버 폐열로 적립된 열 크레딧입니다.<br>1 HC = 10원, 원화와 함께 결제할 수 있어요.</div>
+        <button onClick="{{ enterApp }}" style="margin-top:12px;width:100%;height:72px;border:none;border-radius:14px;background:#121816;color:#fff;font-family:Pretendard,sans-serif;font-size:21px;font-weight:700;cursor:pointer;">마켓 입장</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ============ APP ============ -->
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;font-family:Archivo,Pretendard,sans-serif;">
+
+  <div style="flex:none;height:96px;padding:22px 32px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:#F2F4F3;">
+    <div style="display:flex;flex-direction:column;gap:1px;">
+      <div style="font-stretch:125%;font-weight:800;font-size:19px;letter-spacing:.02em;">CORE45</div>
+      <div style="font-size:14px;color:#5B6662;">Heat Exchange</div>
+    </div>
+    
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;height:46px;padding:0 16px;border-radius:12px;background:rgba(95,227,190,.86);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -6px 14px -6px rgba(10,127,96,.35),0 12px 28px -14px rgba(10,127,96,.55);color:#08281E;">
+      <div style="font-size:14px;font-weight:700;font-stretch:125%;">HC</div>
+      <div style="font-size:16px;font-weight:600;">{{ hc }}</div>
+    </div>
+    <button onClick="{{ openNotif }}" aria-label="알림" style="position:relative;width:46px;height:46px;border-radius:12px;border:1px solid #D3D9D7;background:#FBFCFC;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;">
+      <svg width="24" height="24"><path d="M6 16.5 V11 C6 7.7 8.7 5 12 5 C15.3 5 18 7.7 18 11 V16.5 L19.5 18 H4.5 Z M10 20.5 C10.4 21.3 11.1 21.7 12 21.7 C12.9 21.7 13.6 21.3 14 20.5" style="fill:none;stroke:#121816;stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round;"></path></svg>
+      <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#D9443F;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #F2F4F3;">{{ unread }}</div>
+      </sc-if>
+    </button>
+    <button onClick="{{ askReset }}" style="height:46px;padding:0 16px;border-radius:12px;border:1px solid #D3D9D7;background:#FBFCFC;font-family:Pretendard,sans-serif;font-size:15px;font-weight:600;color:#3A4541;cursor:pointer;">체험 종료</button>
+  </div>
+
+  <div ref="{{ scrollRef }}" style="flex:1;min-height:0;margin-bottom:112px;overflow-y:auto;padding:20px 32px 24px;box-sizing:border-box;font-family:Archivo,Pretendard,sans-serif;">
+
+    <!-- MARKET -->
+    <sc-if value="{{ showMarket }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="02 Market" style="display:flex;flex-direction:column;gap:20px;animation:hxFade .3s ease;">
+      <div style="position:relative;border-radius:16px;background:#F7F8F8;border:1px solid #D3D9D7;padding:24px;overflow:hidden;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:flex-end;gap:20px;">
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:15px;color:#5B6662;">실시간 서버 폐열</div>
+            <div style="display:flex;align-items:baseline;gap:6px;"><div style="font-size:40px;font-weight:600;letter-spacing:-.02em;">{{ heatKw }}</div><div style="font-size:17px;color:#5B6662;">kW</div><div style="margin-left:14px;font-size:15px;color:#5B6662;">AI 부하 <b style="color:#0A7F60;font-weight:600;">{{ aiLoad }}%</b></div></div>
+          </div>
+          <div style="margin-left:auto;max-width:330px;font-family:Pretendard,sans-serif;font-size:16px;font-weight:600;line-height:1.45;text-align:right;text-wrap:pretty;">{{ heatNow }}</div>
+        </div>
+        <div style="position:relative;height:96px;">
+          <div style="position:absolute;inset:0;border-radius:10px;background:#5FE3BE;opacity:{{ heatOpacity }};transition:opacity 1.2s;"></div>
+          <svg width="720" height="96" style="position:absolute;inset:0;overflow:visible;"><path d="{{ heatLine }}" style="fill:none;stroke:#121816;stroke-width:2;stroke-linejoin:round;"></path></svg>
+        </div>
+        <div style="display:flex;gap:28px;font-family:Pretendard,sans-serif;font-size:15px;color:#3A4541;">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#E0892E;"></div><b>고온 작물</b> 폐열 증가 시 공급↑ 가격↓</div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:3px;background:#4E9F5E;"></div><b>저온 작물</b> 폐열 증가 시 공급↓ 가격↑</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+          <button onClick="{{ f.onClick }}" style="height:46px;padding:0 18px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.fg }};font-family:Pretendard,sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;">{{ f.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+          <div onClick="{{ r.open }}" style="display:flex;align-items:center;gap:16px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #ECEFEE;" style-active="background:#F2F4F3;">
+            <div style="flex:none;width:56px;height:56px;border-radius:12px;position:relative;overflow:hidden;background:{{ r.tc }};color:#fff;font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ r.ch }}<div style="position:absolute;inset:0;background-color:{{ r.imgBg }};background-image:{{ r.imgUrl }};background-size:70%;background-repeat:no-repeat;background-position:center;"></div></div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+              <div style="display:flex;align-items:baseline;gap:8px;"><div style="font-family:Pretendard,sans-serif;font-size:20px;font-weight:700;">{{ r.name }}</div><div style="font-size:14px;color:#7A8581;white-space:nowrap;">{{ r.en }}</div></div>
+              <div style="font-family:Pretendard,sans-serif;font-size:14px;color:#5B6662;">{{ r.unit }} · {{ r.gh }}</div>
+            </div>
+            <svg width="100" height="40" style="flex:none;"><path d="{{ r.spark }}" style="fill:none;stroke:{{ r.chgColor }};stroke-width:1.8;stroke-linejoin:round;"></path></svg>
+            <div style="flex:none;width:120px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+              <div style="font-size:19px;font-weight:600;">{{ r.price }}</div>
+              <div style="font-size:14px;font-weight:500;color:{{ r.chgColor }};">{{ r.chg }}</div>
+            </div>
+            <button onClick="{{ r.toggleWatch }}" aria-label="관심" style="flex:none;width:46px;height:46px;border-radius:12px;border:1px solid #DDE2E0;background:#FBFCFC;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;">
+              <svg width="24" height="24"><path d="M12 20 C5 15 3 11.5 3 8.5 C3 6 5 4 7.5 4 C9.5 4 11 5.2 12 6.8 C13 5.2 14.5 4 16.5 4 C19 4 21 6 21 8.5 C21 11.5 19 15 12 20 Z" style="fill:{{ r.heartFill }};stroke:{{ r.heartStroke }};stroke-width:1.7;stroke-linejoin:round;transition:fill .2s;"></path></svg>
+            </button>
+            <button onClick="{{ r.add }}" aria-label="담기" style="flex:none;width:46px;height:46px;border-radius:12px;border:none;background:#121816;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;" style-active="transform:scale(.92);">
+              <svg width="24" height="24"><path d="M12 5 V19 M5 12 H19" style="fill:none;stroke:#7CF0CF;stroke-width:2;stroke-linecap:round;"></path></svg>
+            </button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- GREENHOUSES -->
+    <sc-if value="{{ showGreens }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="03 Greenhouses" style="display:flex;flex-direction:column;gap:20px;animation:hxFade .3s ease;">
+      <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Pretendard,sans-serif;font-size:32px;font-weight:800;letter-spacing:-.02em;">온실 현황</div><div style="font-family:Pretendard,sans-serif;font-size:16px;color:#5B6662;">서버 폐열로 난방하는 온실 4곳의 실시간 상태</div></div>
+      <div style="position:relative;height:168px;border-radius:16px;background:#F7F8F8;border:1px solid #D3D9D7;overflow:hidden;">
+        <svg width="770" height="168" style="position:absolute;inset:0;">
+          <sc-for list="{{ flowLines }}" as="fl" hint-placeholder-count="0">
+            <path d="{{ fl.d }}" style="fill:none;stroke:{{ fl.c }};stroke-width:{{ fl.w }};stroke-dasharray:8 12;animation:hxDash {{ fl.s }}s linear infinite;stroke-linecap:round;"></path>
+          </sc-for>
+        </svg>
+        <div style="position:absolute;left:24px;top:40px;width:150px;height:88px;border-radius:12px;background:#5FE3BE;color:#08281E;display:flex;flex-direction:column;justify-content:center;padding:0 16px;box-sizing:border-box;gap:2px;">
+          <div style="font-size:13px;font-weight:600;">IDC 2F–4F</div>
+          <div style="font-size:24px;font-weight:700;">{{ heatKw }} kW</div>
+        </div>
+        <div style="position:absolute;right:24px;top:12px;display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ ghCards }}" as="g" hint-placeholder-count="4">
+            <div style="width:250px;height:30px;border-radius:8px;background:#FBFCFC;border:1px solid #D3D9D7;display:flex;align-items:center;justify-content:space-between;padding:0 12px;box-sizing:border-box;font-family:Pretendard,sans-serif;font-size:14px;white-space:nowrap;"><span>{{ g.name }}</span><span style="font-family:Archivo,sans-serif;font-weight:600;color:#0A7F60;">{{ g.kw }} kW</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <sc-for list="{{ ghCards }}" as="g" hint-placeholder-count="4">
+          <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+                <div style="font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;white-space:nowrap;">{{ g.name }}</div>
+                <div style="font-size:14px;color:#5B6662;white-space:nowrap;">{{ g.en }} · 적정 {{ g.range }}</div>
+              </div>
+              <div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;">
+                <div style="font-size:30px;font-weight:600;letter-spacing:-.02em;">{{ g.temp }}°</div>
+                <div style="font-family:Pretendard,sans-serif;font-size:13px;color:#5B6662;">현재 {{ g.label }}</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;font-family:Pretendard,sans-serif;font-size:14px;color:#5B6662;"><span>폐열 배분</span><span style="font-family:Archivo,sans-serif;">{{ g.share }}%</span></div>
+              <div style="height:8px;border-radius:4px;background:#E6EAE8;overflow:hidden;"><div style="height:100%;width:{{ g.bar }}%;border-radius:4px;background:#5FE3BE;transition:width .8s cubic-bezier(.16,1,.3,1);"></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ g.top }}" as="gc" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:10px;font-size:15px;"><div style="width:10px;height:10px;border-radius:3px;background:{{ gc.tc }};"></div><span style="flex:1;font-family:Pretendard,sans-serif;font-weight:600;">{{ gc.name }}</span><span>{{ gc.price }}</span><span style="width:66px;text-align:right;font-size:13px;color:{{ gc.chgColor }};">{{ gc.chg }}</span></div>
+              </sc-for>
+            </div>
+            <button onClick="{{ g.view }}" style="margin-top:auto;height:48px;border-radius:12px;background:#FBFCFC;background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px #fff,0 6px 16px -10px rgba(20,32,28,.35);font-family:Pretendard,sans-serif;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">{{ g.count }}종 작물 보기<svg width="18" height="18"><path d="M3 9 H15 M10 4 L15 9 L10 14" style="fill:none;stroke:#121816;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg></button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- WATCH -->
+    <sc-if value="{{ showWatch }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="04 Watchlist" style="display:flex;flex-direction:column;gap:20px;animation:hxFade .3s ease;">
+      <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Pretendard,sans-serif;font-size:32px;font-weight:800;letter-spacing:-.02em;">관심 작물</div><div style="font-family:Pretendard,sans-serif;font-size:16px;color:#5B6662;">가격이 ±3% 이상 움직이면 알림을 보내드려요</div></div>
+      <sc-if value="{{ hasWatch }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;">
+          <sc-for list="{{ watchRows }}" as="r" hint-placeholder-count="2">
+            <div onClick="{{ r.open }}" style="display:flex;align-items:center;gap:16px;padding:16px 20px;cursor:pointer;border-bottom:1px solid #ECEFEE;">
+              <div style="flex:none;width:56px;height:56px;border-radius:12px;position:relative;overflow:hidden;background:{{ r.tc }};color:#fff;font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ r.ch }}<div style="position:absolute;inset:0;background-color:{{ r.imgBg }};background-image:{{ r.imgUrl }};background-size:70%;background-repeat:no-repeat;background-position:center;"></div></div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:baseline;gap:8px;"><div style="font-family:Pretendard,sans-serif;font-size:20px;font-weight:700;">{{ r.name }}</div><div style="font-size:14px;color:#7A8581;white-space:nowrap;">{{ r.en }}</div></div>
+                <div style="font-family:Pretendard,sans-serif;font-size:14px;color:#5B6662;">{{ r.unit }} · {{ r.gh }}</div>
+              </div>
+              <svg width="100" height="40" style="flex:none;"><path d="{{ r.spark }}" style="fill:none;stroke:{{ r.chgColor }};stroke-width:1.8;"></path></svg>
+              <div style="flex:none;width:120px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                <div style="font-size:19px;font-weight:600;">{{ r.price }}</div>
+                <div style="font-size:14px;color:{{ r.chgColor }};">{{ r.chg }}</div>
+              </div>
+              <button onClick="{{ r.toggleWatch }}" style="flex:none;height:46px;padding:0 14px;border-radius:12px;border:1px solid #DDE2E0;background:#FBFCFC;font-family:Pretendard,sans-serif;font-size:14px;font-weight:600;color:#3A4541;cursor:pointer;">해제</button>
+              <button onClick="{{ r.add }}" aria-label="담기" style="flex:none;width:46px;height:46px;border-radius:12px;border:none;background:#121816;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;">
+                <svg width="24" height="24"><path d="M12 5 V19 M5 12 H19" style="fill:none;stroke:#7CF0CF;stroke-width:2;stroke-linecap:round;"></path></svg>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noWatch }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:64px 32px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-family:Pretendard,sans-serif;">
+          <div style="font-size:22px;font-weight:700;">아직 관심 작물이 없어요</div>
+          <div style="font-size:16px;color:#5B6662;">마켓에서 하트를 눌러 시세를 지켜보세요.</div>
+          <button onClick="{{ goMarket }}" style="margin-top:12px;height:54px;padding:0 28px;border-radius:12px;border:none;background:#121816;color:#fff;font-size:17px;font-weight:700;cursor:pointer;">마켓 둘러보기</button>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- CART -->
+    <sc-if value="{{ showCart }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="05 Cart" style="display:flex;flex-direction:column;gap:20px;animation:hxFade .3s ease;">
+      <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Pretendard,sans-serif;font-size:32px;font-weight:800;letter-spacing:-.02em;">장바구니</div><div style="font-family:Pretendard,sans-serif;font-size:16px;color:#5B6662;">결제 시점의 실시간 시세로 계산됩니다</div></div>
+      <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;">
+            <sc-for list="{{ cartRows }}" as="c" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid #ECEFEE;animation:hxUp .35s cubic-bezier(.16,1,.3,1);">
+                <div style="flex:none;width:56px;height:56px;border-radius:12px;position:relative;overflow:hidden;background:{{ c.tc }};color:#fff;font-family:Pretendard,sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ c.ch }}<div style="position:absolute;inset:0;background-color:{{ c.imgBg }};background-image:{{ c.imgUrl }};background-size:70%;background-repeat:no-repeat;background-position:center;"></div></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+                  <div style="font-family:Pretendard,sans-serif;font-size:20px;font-weight:700;">{{ c.name }} <span style="font-size:14px;font-weight:400;color:#7A8581;">{{ c.unit }}</span></div>
+                  <div style="font-size:14px;color:#5B6662;">단가 {{ c.price }} <span style="color:{{ c.chgColor }};">{{ c.chg }}</span></div>
+                </div>
+                <div style="flex:none;display:flex;align-items:center;border:1px solid #D3D9D7;border-radius:12px;height:46px;">
+                  <button onClick="{{ c.dec }}" aria-label="빼기" style="width:46px;height:46px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="20" height="20"><path d="M4 10 H16" style="stroke:#121816;stroke-width:1.8;stroke-linecap:round;"></path></svg></button>
+                  <div style="width:30px;text-align:center;font-size:17px;font-weight:600;">{{ c.qty }}</div>
+                  <button onClick="{{ c.inc }}" aria-label="더하기" style="width:46px;height:46px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="20" height="20"><path d="M10 4 V16 M4 10 H16" style="stroke:#121816;stroke-width:1.8;stroke-linecap:round;"></path></svg></button>
+                </div>
+                <div style="flex:none;width:112px;text-align:right;font-size:19px;font-weight:600;">{{ c.line }}</div>
+                <button onClick="{{ c.remove }}" aria-label="삭제" style="flex:none;width:44px;height:44px;border-radius:12px;border:none;background:#EEF1F0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18"><path d="M4 4 L14 14 M14 4 L4 14" style="stroke:#5B6662;stroke-width:1.8;stroke-linecap:round;"></path></svg></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;font-family:Pretendard,sans-serif;">
+            <div style="display:flex;justify-content:space-between;font-size:17px;color:#5B6662;"><span>상품 {{ cartCount }}개</span><span style="font-family:Archivo,sans-serif;color:#121816;">{{ cartSubtotal }}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:17px;color:#5B6662;"><span>보유 열 크레딧</span><span style="font-family:Archivo,sans-serif;color:#0A7F60;">{{ hc }} HC ({{ hcWon }})</span></div>
+            <button onClick="{{ goCheckout }}" style="margin-top:8px;height:76px;border:none;border-radius:14px;background:rgba(95,227,190,.86);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -6px 14px -6px rgba(10,127,96,.35),0 12px 28px -14px rgba(10,127,96,.55);color:#08281E;font-size:22px;font-weight:800;cursor:pointer;" style-active="transform:scale(.99);">{{ cartSubtotal }} 주문하기</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noCart }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:64px 32px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-family:Pretendard,sans-serif;">
+          <div style="font-size:22px;font-weight:700;">장바구니가 비어 있어요</div>
+          <div style="font-size:16px;color:#5B6662;">폐열로 키운 작물을 담아보세요.</div>
+          <button onClick="{{ goMarket }}" style="margin-top:12px;height:54px;padding:0 28px;border-radius:12px;border:none;background:#121816;color:#fff;font-size:17px;font-weight:700;cursor:pointer;">마켓 둘러보기</button>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- ORDERS -->
+    <sc-if value="{{ showOrders }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="06 Orders" style="display:flex;flex-direction:column;gap:20px;animation:hxFade .3s ease;">
+      <div style="display:flex;flex-direction:column;gap:6px;"><div style="font-family:Pretendard,sans-serif;font-size:32px;font-weight:800;letter-spacing:-.02em;">주문 · 배달</div><div style="font-family:Pretendard,sans-serif;font-size:16px;color:#5B6662;">주문을 누르면 실시간 현황을 볼 수 있어요</div></div>
+      <sc-if value="{{ hasOrders }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;">
+          <sc-for list="{{ orderRows }}" as="o" hint-placeholder-count="1">
+            <div onClick="{{ o.open }}" style="padding:20px;display:flex;align-items:center;gap:18px;cursor:pointer;border-bottom:1px solid #ECEFEE;">
+              <div style="flex:none;width:56px;height:56px;border-radius:12px;background:{{ o.iconBg }};color:{{ o.iconFg }};display:flex;align-items:center;justify-content:center;font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;">{{ o.modeShort }}</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+                <div style="font-family:Pretendard,sans-serif;font-size:19px;font-weight:700;">{{ o.title }}</div>
+                <div style="font-size:14px;color:#5B6662;">#{{ o.no }} · {{ o.time }} · {{ o.total }}</div>
+              </div>
+              <div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px;font-family:Pretendard,sans-serif;">
+                <div style="padding:6px 12px;border-radius:999px;background:{{ o.chipBg }};color:{{ o.chipFg }};font-size:14px;font-weight:700;">{{ o.status }}</div>
+                <div style="font-size:14px;color:#5B6662;">{{ o.eta }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noOrders }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:64px 32px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-family:Pretendard,sans-serif;">
+          <div style="font-size:22px;font-weight:700;">아직 주문이 없어요</div>
+          <div style="font-size:16px;color:#5B6662;">주문하면 배달·픽업 현황이 여기 표시됩니다.</div>
+          <button onClick="{{ goMarket }}" style="margin-top:12px;height:54px;padding:0 28px;border-radius:12px;border:none;background:#121816;color:#fff;font-size:17px;font-weight:700;cursor:pointer;">마켓 둘러보기</button>
+        </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- DETAIL -->
+    <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="07 Crop Detail" style="display:flex;flex-direction:column;gap:18px;animation:hxUp .35s cubic-bezier(.16,1,.3,1);">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button onClick="{{ back }}" style="height:46px;padding:0 16px 0 10px;border-radius:12px;border:1px solid #D3D9D7;background:#FBFCFC;font-family:Pretendard,sans-serif;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;"><svg width="22" height="22"><path d="M14 5 L7 11 L14 17" style="fill:none;stroke:#121816;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>뒤로</button>
+        <div style="font-family:Pretendard,sans-serif;font-size:15px;color:#5B6662;">{{ d.gh }}</div>
+        <button onClick="{{ d.toggleWatch }}" style="margin-left:auto;height:46px;padding:0 16px;border-radius:12px;border:1px solid {{ d.watchBorder }};background:{{ d.watchBg }};color:{{ d.watchFg }};font-family:Pretendard,sans-serif;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;"><svg width="20" height="20"><path d="M10 17 C4 13 2.5 10 2.5 7.3 C2.5 5.2 4.2 3.5 6.3 3.5 C8 3.5 9.2 4.5 10 5.8 C10.8 4.5 12 3.5 13.7 3.5 C15.8 3.5 17.5 5.2 17.5 7.3 C17.5 10 16 13 10 17 Z" style="fill:{{ d.heartFill }};stroke:{{ d.watchFg }};stroke-width:1.6;stroke-linejoin:round;"></path></svg>{{ d.watchLabel }}</button>
+      </div>
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:18px;">
+        <div style="display:flex;gap:18px;align-items:center;">
+          <div style="flex:none;width:84px;height:84px;border-radius:14px;position:relative;overflow:hidden;background:{{ d.tc }};color:#fff;font-family:Pretendard,sans-serif;font-size:36px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ d.ch }}<div style="position:absolute;inset:0;background-color:{{ d.imgBg }};background-image:{{ d.imgUrl }};background-size:70%;background-repeat:no-repeat;background-position:center;"></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+            <div style="font-family:Pretendard,sans-serif;font-size:34px;font-weight:800;letter-spacing:-.02em;">{{ d.name }}</div>
+            <div style="font-size:15px;color:#7A8581;">{{ d.en }} · {{ d.unit }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+            <div style="font-size:38px;font-weight:600;letter-spacing:-.02em;">{{ d.price }}</div>
+            <div style="font-size:17px;color:{{ d.chgColor }};">{{ d.chgFull }}</div>
+          </div>
+        </div>
+        <div style="position:relative;">
+          <svg width="720" height="230" style="display:block;overflow:visible;">
+            <line x1="0" y1="{{ d.openY }}" x2="720" y2="{{ d.openY }}" style="stroke:#C9D0CD;stroke-width:1;stroke-dasharray:4 6;"></line>
+            <path d="{{ d.area }}" style="fill:{{ d.areaFill }};stroke:none;"></path>
+            <path d="{{ d.line }}" style="fill:none;stroke:{{ d.chgColor }};stroke-width:2.5;stroke-linejoin:round;"></path>
+            <circle cx="{{ d.lastX }}" cy="{{ d.lastY }}" r="5" style="fill:{{ d.chgColor }};"></circle>
+          </svg>
+          <div style="position:absolute;left:{{ d.lastXm }}px;top:{{ d.lastYm }}px;width:24px;height:24px;border-radius:50%;border:2px solid {{ d.chgColor }};animation:hxRing 1.5s ease-out infinite;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#5B6662;"><span style="white-space:nowrap;font-family:Pretendard,sans-serif;">최근 2분 · 1.5초마다 갱신</span><span style="display:flex;gap:16px;white-space:nowrap;"><span>고가 {{ d.high }}</span><span>저가 {{ d.low }}</span><span>시가 {{ d.open }}</span></span></div>
+      </div>
+      <div style="border-radius:16px;background:#F7F8F8;border:1px solid #D3D9D7;padding:24px;display:flex;flex-direction:column;gap:16px;font-family:Pretendard,sans-serif;">
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-size:20px;font-weight:700;">폐열에 따른 생육</div><div style="padding:6px 12px;border-radius:999px;background:{{ d.typeBg }};color:{{ d.typeFg }};font-size:14px;font-weight:700;">{{ d.type }}</div></div>
+        <div style="position:relative;height:12px;border-radius:6px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;">
+          <div style="border-radius:6px 0 0 6px;background:#8CC796;"></div><div style="background:#A9F1DB;"></div><div style="border-radius:0 6px 6px 0;background:#F0B97A;"></div>
+          <div style="position:absolute;top:-8px;left:{{ d.affPos }}%;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:#FBFCFC;border:3px solid #121816;box-sizing:border-box;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:#5B6662;"><span>저온 선호</span><span>열 중립</span><span>고온 선호</span></div>
+        <div style="font-size:17px;line-height:1.65;color:#3A4541;max-width:640px;">{{ d.desc }}</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:#FBFCFC;border:1px solid #DDE2E0;">
+          <div style="width:10px;height:10px;border-radius:50%;background:{{ d.pressColor }};animation:hxBlink 1.2s infinite;"></div>
+          <div style="font-size:16px;font-weight:600;">현재 폐열 <span style="font-family:Archivo,sans-serif;">{{ heatKw }} kW</span> · {{ d.press }}</div>
+        </div>
+      </div>
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:18px;">
+        <div style="display:flex;align-items:center;border:1px solid #D3D9D7;border-radius:12px;height:60px;">
+          <button onClick="{{ d.dec }}" aria-label="빼기" style="width:58px;height:60px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="22"><path d="M5 11 H17" style="stroke:#121816;stroke-width:1.8;stroke-linecap:round;"></path></svg></button>
+          <div style="width:36px;text-align:center;font-size:21px;font-weight:600;">{{ d.qty }}</div>
+          <button onClick="{{ d.inc }}" aria-label="더하기" style="width:58px;height:60px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="22" height="22"><path d="M11 5 V17 M5 11 H17" style="stroke:#121816;stroke-width:1.8;stroke-linecap:round;"></path></svg></button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px;"><div style="font-family:Pretendard,sans-serif;font-size:14px;color:#5B6662;">합계</div><div style="font-size:23px;font-weight:600;">{{ d.total }}</div></div>
+        <button onClick="{{ d.add }}" style="margin-left:auto;height:60px;padding:0 22px;border-radius:12px;border:1px solid #121816;background:#FBFCFC;font-family:Pretendard,sans-serif;font-size:18px;font-weight:700;cursor:pointer;" style-active="transform:scale(.97);">장바구니 담기</button>
+        <button onClick="{{ d.buy }}" style="height:60px;padding:0 26px;border-radius:12px;border:none;background:rgba(95,227,190,.86);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -6px 14px -6px rgba(10,127,96,.35),0 12px 28px -14px rgba(10,127,96,.55);color:#08281E;font-family:Pretendard,sans-serif;font-size:18px;font-weight:800;cursor:pointer;" style-active="transform:scale(.97);">바로 구매</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- CHECKOUT -->
+    <sc-if value="{{ showCheckout }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="08 Checkout" style="display:flex;flex-direction:column;gap:18px;font-family:Pretendard,sans-serif;animation:hxUp .35s cubic-bezier(.16,1,.3,1);">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button onClick="{{ backToCart }}" style="height:46px;padding:0 16px 0 10px;border-radius:12px;border:1px solid #D3D9D7;background:#FBFCFC;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;"><svg width="22" height="22"><path d="M14 5 L7 11 L14 17" style="fill:none;stroke:#121816;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>장바구니</button>
+        <div style="font-size:30px;font-weight:800;letter-spacing:-.02em;">주문 · 결제</div>
+      </div>
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;">
+        <div style="font-size:20px;font-weight:700;">수령 방법</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <sc-for list="{{ co.modes }}" as="m" hint-placeholder-count="2">
+            <button onClick="{{ m.onClick }}" style="height:88px;border-radius:14px;border:2px solid {{ m.border }};background:{{ m.bg }};display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:0 20px;cursor:pointer;text-align:left;transition:all .2s;">
+              <span style="font-size:19px;font-weight:800;color:#121816;">{{ m.label }}</span><span style="font-size:14px;color:#5B6662;">{{ m.sub }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ co.isPick }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:16px;align-items:center;padding:18px;border-radius:14px;background:#F7F8F8;border:1px solid #D3D9D7;">
+            <div style="flex:none;width:60px;height:60px;border-radius:12px;background:#5FE3BE;color:#08281E;font-family:Archivo,sans-serif;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;">1F</div>
+            <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:18px;font-weight:700;">HEAT EXCHANGE 스마트 픽업 존</div><div style="font-size:15px;color:#3A4541;">경기 성남시 분당구 삼평동 637-2</div><div style="font-size:15px;color:#3A4541;">결제 후 약 8분 · 픽업번호와 인증 코드를 알려드려요</div></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ co.isDel }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:15px;color:#5B6662;">배달 주소 · 출발 경기 성남시 분당구 삼평동 637-2</div>
+            <sc-for list="{{ co.addrs }}" as="ad" hint-placeholder-count="3">
+              <button onClick="{{ ad.onClick }}" style="height:62px;border-radius:12px;border:2px solid {{ ad.border }};background:{{ ad.bg }};display:flex;align-items:center;gap:12px;padding:0 18px;cursor:pointer;transition:all .2s;">
+                <div style="width:20px;height:20px;border-radius:50%;border:2px solid {{ ad.dot }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;border-radius:50%;background:{{ ad.dotIn }};"></div></div>
+                <span style="font-size:17px;font-weight:700;color:#121816;white-space:nowrap;">{{ ad.name }}</span><span style="font-size:14px;color:#7A8581;white-space:nowrap;">{{ ad.en }}</span><span style="margin-left:auto;white-space:nowrap;font-size:14px;color:#5B6662;">{{ ad.dist }} · 약 {{ ad.min }}분</span>
+              </button>
+            </sc-for>
+            <div style="font-size:15px;color:#5B6662;margin-top:6px;">요청사항</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <sc-for list="{{ co.memos }}" as="mm" hint-placeholder-count="3">
+                <button onClick="{{ mm.onClick }}" style="height:46px;padding:0 16px;border-radius:999px;border:1px solid {{ mm.border }};background:{{ mm.bg }};color:{{ mm.fg }};font-size:15px;font-weight:600;cursor:pointer;">{{ mm.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><div style="font-size:20px;font-weight:700;">열 크레딧 사용</div><div style="flex:none;white-space:nowrap;font-family:Archivo,sans-serif;font-size:15px;color:#5B6662;">보유 {{ hc }} HC</div></div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <input type="range" min="0" max="{{ co.hcMax }}" step="10" value="{{ co.hcUse }}" onChange="{{ co.onHc }}" style="flex:1;height:32px;">
+          <div style="width:110px;text-align:right;font-family:Archivo,sans-serif;font-size:22px;font-weight:600;color:#0A7F60;">{{ co.hcUse }} HC</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onClick="{{ co.hcNone }}" style="height:44px;padding:0 16px;border-radius:999px;border:1px solid #D3D9D7;background:#FBFCFC;font-size:15px;font-weight:600;cursor:pointer;">사용 안 함</button>
+          <button onClick="{{ co.hcAll }}" style="height:44px;padding:0 16px;border-radius:999px;border:1px solid #0A7F60;background:#E2F7EF;color:#0A7F60;font-size:15px;font-weight:700;cursor:pointer;">최대 사용</button>
+        </div>
+        <div style="font-size:20px;font-weight:700;margin-top:6px;">원화 결제 수단</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <sc-for list="{{ co.methods }}" as="pm" hint-placeholder-count="3">
+            <button onClick="{{ pm.onClick }}" style="height:68px;border-radius:12px;border:2px solid {{ pm.border }};background:{{ pm.bg }};font-size:17px;font-weight:700;color:#121816;cursor:pointer;transition:all .2s;">{{ pm.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:17px;color:#5B6662;"><span>상품 금액</span><span style="font-family:Archivo,sans-serif;color:#121816;">{{ co.subtotal }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:17px;color:#5B6662;"><span>{{ co.feeLabel }}</span><span style="font-family:Archivo,sans-serif;color:#121816;">{{ co.fee }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:17px;color:#5B6662;"><span>열 크레딧 차감</span><span style="font-family:Archivo,sans-serif;color:#0A7F60;">−{{ co.discount }}</span></div>
+        <div style="height:1px;background:#DDE2E0;margin:6px 0;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:19px;font-weight:700;">최종 원화 결제</span><span style="font-family:Archivo,sans-serif;font-size:30px;font-weight:600;">{{ co.final }}</span></div>
+        <button onClick="{{ co.pay }}" style="margin-top:10px;height:78px;border:none;border-radius:14px;background:rgba(95,227,190,.86);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -6px 14px -6px rgba(10,127,96,.35),0 12px 28px -14px rgba(10,127,96,.55);color:#08281E;font-size:22px;font-weight:800;cursor:pointer;" style-active="transform:scale(.99);">{{ co.payLabel }}</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- PAID -->
+    <sc-if value="{{ showPaid }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="09 Payment Complete" style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;padding:40px 0;font-family:Pretendard,sans-serif;">
+      <div style="position:relative;width:168px;height:168px;">
+        <sc-for list="{{ burst }}" as="b" hint-placeholder-count="0">
+          <div style="position:absolute;left:78px;top:78px;width:12px;height:12px;border-radius:50%;background:{{ b.c }};--bx:{{ b.x2 }}px;--by:{{ b.y2 }}px;animation:hxBurst 1.1s cubic-bezier(.16,1,.3,1) .35s both;"></div>
+        </sc-for>
+        <div style="position:absolute;inset:0;border-radius:50%;background:#5FE3BE;animation:hxPop .5s cubic-bezier(.16,1,.3,1) both;box-shadow:0 20px 40px -18px rgba(16,150,112,.8);"></div>
+        <svg width="168" height="168" style="position:absolute;inset:0;"><path d="M50 86 L76 112 L122 60" style="fill:none;stroke:#08281E;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:120;animation:hxDraw .5s cubic-bezier(.16,1,.3,1) .45s forwards;"></path></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;animation:hxUp .5s cubic-bezier(.16,1,.3,1) .5s both;">
+        <div style="font-size:40px;font-weight:800;letter-spacing:-.02em;">결제가 완료되었어요</div>
+        <div style="font-family:Archivo,sans-serif;font-size:17px;color:#5B6662;">주문번호 #{{ pd.no }}</div>
+      </div>
+      <div style="width:100%;max-width:560px;background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:24px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;text-align:left;animation:hxUp .5s cubic-bezier(.16,1,.3,1) .65s both;">
+        <div style="display:flex;justify-content:space-between;font-size:17px;"><span style="color:#5B6662;">{{ pd.modeLabel }}</span><span style="font-weight:700;">{{ pd.dest }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:17px;"><span style="color:#5B6662;">예상 시간</span><span style="font-weight:700;">{{ pd.eta }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:17px;"><span style="color:#5B6662;">결제</span><span style="font-family:Archivo,sans-serif;">{{ pd.paid }}</span></div>
+        <div style="padding:14px 16px;border-radius:12px;background:#E2F7EF;font-size:16px;color:#0B4A38;line-height:1.5;">이번 주문의 작물은 서버 폐열 약 <b>{{ pd.kwh }} kWh</b>로 재배되었어요.</div>
+      </div>
+      <div style="display:flex;gap:12px;animation:hxUp .5s cubic-bezier(.16,1,.3,1) .8s both;">
+        <button onClick="{{ goMarket }}" style="height:64px;padding:0 28px;border-radius:12px;border:1px solid #D3D9D7;background:#FBFCFC;font-size:18px;font-weight:700;cursor:pointer;">계속 쇼핑</button>
+        <button onClick="{{ pd.track }}" style="height:64px;padding:0 32px;border-radius:12px;border:none;background:#121816;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">{{ pd.trackLabel }}</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- TRACK -->
+    <sc-if value="{{ showTrack }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="10 Tracking" style="display:flex;flex-direction:column;gap:18px;font-family:Pretendard,sans-serif;animation:hxUp .35s cubic-bezier(.16,1,.3,1);">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button onClick="{{ goOrders }}" style="height:46px;padding:0 16px 0 10px;border-radius:12px;border:1px solid #D3D9D7;background:#FBFCFC;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;"><svg width="22" height="22"><path d="M14 5 L7 11 L14 17" style="fill:none;stroke:#121816;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>주문 내역</button>
+        <div style="font-family:Archivo,sans-serif;font-size:15px;color:#5B6662;">#{{ tr.no }}</div>
+        <div style="margin-left:auto;padding:6px 12px;border-radius:999px;background:#E2F7EF;color:#0A7F60;font-size:14px;font-weight:700;">{{ tr.status }}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font-size:42px;font-weight:800;letter-spacing:-.025em;">{{ tr.headline }}</div>
+        <div style="font-size:17px;color:#5B6662;">{{ tr.sub }}</div>
+      </div>
+
+      <sc-if value="{{ tr.isDel }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative;width:770px;height:380px;border-radius:16px;background:#E8ECEA;border:1px solid #D3D9D7;overflow:hidden;">
+          <iframe ref="{{ mapRef }}" src="./delivery-map.html" onLoad="{{ onMapLoad }}" title="배달 지도" style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+          <div style="position:absolute;right:16px;top:16px;padding:10px 14px;border-radius:12px;background:#FBFCFC;border:1px solid #D3D9D7;display:flex;flex-direction:column;gap:2px;box-shadow:0 8px 20px -12px rgba(0,0,0,.35);">
+            <div style="font-size:13px;color:#5B6662;">남은 거리</div>
+            <div style="font-family:Archivo,sans-serif;font-size:20px;font-weight:600;">{{ tr.remain }}</div>
+          </div>
+        </div>
+        <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:18px 22px;display:flex;align-items:center;gap:16px;">
+          <div style="width:52px;height:52px;border-radius:12px;background:#E2F7EF;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28"><path d="M6 20 a3.5 3.5 0 1 0 0.01 0 M22 20 a3.5 3.5 0 1 0 0.01 0 M6 20 L11 11 H17 L22 20 M13 11 L11 7 H8 M17 11 L19 7 H22" style="fill:none;stroke:#0A7F60;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;"></path></svg></div>
+          <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:18px;font-weight:700;">CORE45 그린 라이더</div><div style="font-size:14px;color:#5B6662;">전기 바이크 · {{ tr.memo }}</div></div>
+          <div style="margin-left:auto;text-align:right;display:flex;flex-direction:column;gap:2px;"><div style="font-size:14px;color:#5B6662;">도착 예정</div><div style="font-family:Archivo,sans-serif;font-size:22px;font-weight:600;">{{ tr.arrive }}</div></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ tr.isPick }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:16px;background:#F7F8F8;border:1px solid #D3D9D7;padding:28px;display:flex;align-items:center;gap:20px;">
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1;"><div style="font-size:15px;color:#5B6662;">픽업 위치</div><div style="font-size:24px;font-weight:800;">1F HEAT EXCHANGE</div><div style="font-size:16px;color:#3A4541;">스마트 픽업 존 · 경기 성남시 분당구 삼평동 637-2</div></div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:center;padding:16px 22px;border-radius:14px;background:#5FE3BE;color:#08281E;"><div style="font-size:14px;font-weight:600;">픽업번호</div><div style="font-family:Archivo,sans-serif;font-size:40px;font-weight:700;">{{ tr.pickNo }}</div></div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:center;padding:16px 22px;border-radius:14px;background:#FBFCFC;border:1px solid #D3D9D7;"><div style="font-size:14px;color:#5B6662;">인증 코드</div><div style="font-family:Archivo,sans-serif;font-size:40px;font-weight:700;color:{{ tr.codeColor }};">{{ tr.code }}</div></div>
+        </div>
+        <sc-if value="{{ tr.canPick }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ tr.pickup }}" style="height:76px;border:none;border-radius:14px;background:rgba(95,227,190,.86);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -6px 14px -6px rgba(10,127,96,.35),0 12px 28px -14px rgba(10,127,96,.55);color:#08281E;font-size:22px;font-weight:800;cursor:pointer;animation:hxBreath 2.4s ease-in-out infinite;">수령 완료</button>
+        </sc-if>
+      </sc-if>
+
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:24px;display:flex;flex-direction:column;">
+        <div style="height:6px;border-radius:3px;background:#E6EAE8;overflow:hidden;margin-bottom:22px;"><div style="height:100%;width:{{ tr.pct }}%;border-radius:3px;background:#5FE3BE;transition:width 1.5s linear;"></div></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          <sc-for list="{{ tr.steps }}" as="st" hint-placeholder-count="4">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:{{ st.bg }};border:2px solid {{ st.border }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:#5B6662;font-family:Archivo,sans-serif;font-size:13px;font-weight:700;transition:all .4s;">
+                <sc-if value="{{ st.done }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14"><path d="M2.5 7.5 L5.8 10.5 L11.5 3.8" style="fill:none;stroke:#08281E;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"></path></svg></sc-if>
+                <sc-if value="{{ st.todo }}" hint-placeholder-val="{{ true }}">{{ st.n }}</sc-if>
+              </div>
+              <div style="font-size:16px;font-weight:700;color:{{ st.fg }};">{{ st.label }}</div>
+              <div style="font-family:Archivo,sans-serif;font-size:13px;color:#7A8581;">{{ st.en }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#FBFCFC;border:1px solid #DDE2E0;border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:18px;font-weight:700;">주문 상품</div>
+        <sc-for list="{{ tr.items }}" as="it" hint-placeholder-count="2">
+          <div style="display:flex;justify-content:space-between;font-size:16px;"><span>{{ it.name }} × {{ it.qty }}</span><span style="font-family:Archivo,sans-serif;">{{ it.line }}</span></div>
+        </sc-for>
+        <div style="height:1px;background:#DDE2E0;margin:4px 0;"></div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;color:#5B6662;"><span>결제</span><span style="font-family:Archivo,sans-serif;">{{ tr.paid }}</span></div>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+
+  <!-- tab bar -->
+  <div style="position:absolute;left:24px;right:24px;bottom:18px;height:82px;border-radius:41px;z-index:30;font-family:Pretendard,sans-serif;background:rgba(250,252,251,.55);-webkit-backdrop-filter:blur(24px) saturate(190%);backdrop-filter:blur(24px) saturate(190%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 1px #fff,inset 0 -1px 1px rgba(20,32,28,.06),0 18px 40px -18px rgba(20,32,28,.45);">
+    <div style="position:absolute;top:6px;bottom:6px;left:6px;width:{{ tabW }}px;border-radius:35px;background:rgba(95,227,190,.8);border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -5px 12px -6px rgba(10,127,96,.35),0 8px 18px -10px rgba(10,127,96,.6);transform:translateX({{ tabX }}px) scale({{ tabSx }},{{ tabSy }});transition:transform .55s cubic-bezier(.34,1.4,.5,1);"></div>
+    <div style="position:absolute;inset:6px;display:grid;grid-template-columns:repeat(5,1fr);">
+    <button onClick="{{ tabs.market.onClick }}" style="position:relative;border:none;background:none;border-radius:35px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:color .3s;cursor:pointer;color:{{ tabs.market.color }};">
+      <svg width="26" height="26"><path d="M4 21 H22 M6 16 L10.5 10.5 L14 14 L20 7 M16 7 H20 V11" style="fill:none;stroke:{{ tabs.market.color }};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>
+      <span style="font-size:14px;font-weight:700;">마켓</span>
+    </button>
+    <button onClick="{{ tabs.greens.onClick }}" style="position:relative;border:none;background:none;border-radius:35px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:color .3s;cursor:pointer;color:{{ tabs.greens.color }};">
+      <svg width="26" height="26"><path d="M3.5 12 L13 4.5 L22.5 12 V21.5 H3.5 Z M3.5 15.5 H22.5 M9.5 8.5 V21.5 M16.5 8.5 V21.5" style="fill:none;stroke:{{ tabs.greens.color }};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>
+      <span style="font-size:14px;font-weight:700;">온실</span>
+    </button>
+    <button onClick="{{ tabs.watch.onClick }}" style="position:relative;border:none;background:none;border-radius:35px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:color .3s;cursor:pointer;color:{{ tabs.watch.color }};">
+      <svg width="26" height="26"><path d="M13 21.5 C5.5 16.3 3.5 12.6 3.5 9.3 C3.5 6.6 5.6 4.5 8.2 4.5 C10.3 4.5 11.9 5.8 13 7.5 C14.1 5.8 15.7 4.5 17.8 4.5 C20.4 4.5 22.5 6.6 22.5 9.3 C22.5 12.6 20.5 16.3 13 21.5 Z" style="fill:none;stroke:{{ tabs.watch.color }};stroke-width:1.8;stroke-linejoin:round;"></path></svg>
+      <span style="font-size:14px;font-weight:700;">관심</span>
+      <sc-if value="{{ tabs.watch.hasBadge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:14px;left:calc(50% + 10px);min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#121816;color:#fff;font-family:Archivo,sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ tabs.watch.badge }}</div></sc-if>
+    </button>
+    <button onClick="{{ tabs.cart.onClick }}" style="position:relative;border:none;background:none;border-radius:35px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:color .3s;cursor:pointer;color:{{ tabs.cart.color }};">
+      <svg width="26" height="26"><path d="M3 4.5 H6 L8.5 16.5 H19.5 L21.8 8 H7.2 M10 21 a1.3 1.3 0 1 0 0.01 0 M18 21 a1.3 1.3 0 1 0 0.01 0" style="fill:none;stroke:{{ tabs.cart.color }};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>
+      <span style="font-size:14px;font-weight:700;">장바구니</span>
+      <sc-if value="{{ tabs.cart.hasBadge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:14px;left:calc(50% + 10px);min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#5FE3BE;color:#08281E;font-family:Archivo,sans-serif;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;transform:scale({{ tabs.cart.scale }});transition:transform .3s cubic-bezier(.16,1,.3,1);">{{ tabs.cart.badge }}</div></sc-if>
+    </button>
+    <button onClick="{{ tabs.orders.onClick }}" style="position:relative;border:none;background:none;border-radius:35px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:color .3s;cursor:pointer;color:{{ tabs.orders.color }};">
+      <svg width="26" height="26"><path d="M6 3.5 H20 V22.5 L17 20.5 L13 22.5 L9 20.5 L6 22.5 Z M9.5 9 H16.5 M9.5 13 H16.5" style="fill:none;stroke:{{ tabs.orders.color }};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>
+      <span style="font-size:14px;font-weight:700;">주문</span>
+      <sc-if value="{{ tabs.orders.hasBadge }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:14px;left:calc(50% + 10px);min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#121816;color:#fff;font-family:Archivo,sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;">{{ tabs.orders.badge }}</div></sc-if>
+    </button>
+    </div>
+  </div>
+
+  <sc-if value="{{ flyShow }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:{{ flyX }}px;top:0;width:0;height:0;transition:left .65s linear;pointer-events:none;z-index:40;">
+      <div style="position:absolute;left:-17px;top:{{ flyY }}px;margin-top:-17px;width:34px;height:34px;border-radius:10px;background:{{ flyC }};border:3px solid #fff;box-shadow:0 8px 18px -6px rgba(0,0,0,.35);transition:top .65s cubic-bezier(.4,-0.8,.8,.6),transform .65s;transform:scale({{ flyS }}) rotate({{ flyR }}deg);"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNotif }}" style="position:absolute;inset:0;background:rgba(30,40,36,.22);z-index:50;animation:hxFade .2s ease;">
+      <div onClick="{{ stop }}" style="position:absolute;right:24px;top:88px;width:470px;max-height:820px;background:#FBFCFC;border:1px solid #D3D9D7;border-radius:16px;box-shadow:0 24px 50px -20px rgba(20,32,28,.45);display:flex;flex-direction:column;overflow:hidden;font-family:Pretendard,sans-serif;animation:hxUp .3s cubic-bezier(.16,1,.3,1);">
+        <div style="display:flex;align-items:center;padding:20px 20px 14px;gap:12px;"><div style="font-size:21px;font-weight:800;">알림</div><button onClick="{{ readAll }}" style="margin-left:auto;height:40px;padding:0 14px;border-radius:999px;border:1px solid #D3D9D7;background:#FBFCFC;font-size:14px;font-weight:600;cursor:pointer;">모두 읽음</button></div>
+        <div style="overflow-y:auto;display:flex;flex-direction:column;">
+          <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="0">
+            <div onClick="{{ n.open }}" style="display:flex;gap:14px;padding:16px 20px;border-top:1px solid #ECEFEE;cursor:pointer;background:{{ n.bg }};">
+              <div style="flex:none;width:8px;height:8px;border-radius:50%;margin-top:8px;background:{{ n.dot }};"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:4px;"><div style="font-size:16px;font-weight:700;">{{ n.title }}</div><div style="font-size:14px;color:#5B6662;line-height:1.5;">{{ n.body }}</div></div>
+              <div style="flex:none;font-size:12px;color:#7A8581;">{{ n.time }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noNotifs }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:44px 24px;text-align:center;font-size:16px;color:#5B6662;line-height:1.6;">새 알림이 없어요.<br>관심 작물을 등록하거나 주문하면 알림이 와요.</div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:24px;right:24px;bottom:116px;z-index:45;overflow:hidden;border-radius:14px;pointer-events:none;">
+      <div onClick="{{ toastOpen }}" style="pointer-events:auto;background:#121816;color:#F2F4F3;border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:center;box-shadow:0 16px 36px -14px rgba(0,0,0,.45);animation:hxRise .4s cubic-bezier(.16,1,.3,1);cursor:pointer;font-family:Pretendard,sans-serif;">
+        <div style="flex:none;width:40px;height:40px;border-radius:10px;background:#5FE3BE;"></div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;"><div style="font-size:16px;font-weight:700;">{{ toast.title }}</div><div style="font-size:14px;color:#C3CCC8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ toast.body }}</div></div>
+        <svg width="20" height="20"><path d="M7 4 L13 10 L7 16" style="fill:none;stroke:#7CF0CF;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"></path></svg>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ paying }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:70;background:rgba(242,244,243,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;font-family:Pretendard,sans-serif;animation:hxFade .2s ease;">
+      <div style="width:64px;height:64px;border-radius:50%;border:5px solid #D3E9E1;border-top-color:#0A7F60;animation:hxSpin .8s linear infinite;box-sizing:border-box;"></div>
+      <div style="font-size:22px;font-weight:700;">결제 진행 중</div>
+      <div style="font-size:16px;color:#5B6662;">열 크레딧 차감과 원화 승인을 처리하고 있어요</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ resetModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:80;background:rgba(30,40,36,.38);display:flex;align-items:center;justify-content:center;font-family:Pretendard,sans-serif;animation:hxFade .2s ease;">
+      <div style="width:500px;background:#FBFCFC;border:1px solid #D3D9D7;border-radius:16px;padding:36px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;text-align:center;box-shadow:0 30px 60px -24px rgba(20,32,28,.45);animation:hxUp .3s cubic-bezier(.16,1,.3,1);">
+        <div style="font-size:26px;font-weight:800;">체험을 종료할까요?</div>
+        <div style="font-size:17px;color:#5B6662;line-height:1.6;">장바구니·관심 작물·주문 내역이 초기화되고<br>다음 관람객을 위한 첫 화면으로 돌아갑니다.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+          <button onClick="{{ cancelReset }}" style="height:64px;border-radius:12px;border:1px solid #D3D9D7;background:#FBFCFC;font-size:18px;font-weight:700;cursor:pointer;">계속하기</button>
+          <button onClick="{{ doReset }}" style="height:64px;border-radius:12px;border:none;background:#121816;color:#fff;font-size:18px;font-weight:700;cursor:pointer;">종료</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ idleShow }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:90;background:rgba(30,40,36,.45);display:flex;align-items:center;justify-content:center;font-family:Pretendard,sans-serif;animation:hxFade .2s ease;">
+      <div style="width:500px;background:#FBFCFC;border:1px solid #D3D9D7;border-radius:16px;padding:36px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;">
+        <div style="font-family:Archivo,sans-serif;font-size:72px;font-weight:600;color:#0A7F60;">{{ idleLeft }}</div>
+        <div style="font-size:25px;font-weight:800;">아직 체험 중이신가요?</div>
+        <div style="font-size:17px;color:#5B6662;">응답이 없으면 다음 관람객을 위해 초기화됩니다.</div>
+        <button onClick="{{ keepGoing }}" style="margin-top:12px;width:100%;height:68px;border-radius:12px;border:none;background:rgba(95,227,190,.86);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 1px 1px rgba(255,255,255,.95),inset 0 -6px 14px -6px rgba(10,127,96,.35),0 12px 28px -14px rgba(10,127,96,.55);color:#08281E;font-size:20px;font-weight:800;cursor:pointer;">계속 체험하기</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+</div>
+</div>
+<sc-if value="{{ showDevice }}" hint-placeholder-val="{{ false }}"><div style="font-family:Archivo,Pretendard,sans-serif;font-size:15px;color:#5B6662;display:flex;gap:14px;"><span style="font-weight:700;color:#121816;">iPad Pro 11″ (3세대)</span><span>834 × 1194 pt</span><span>1668 × 2388 px @2x</span></div></sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;deviceFrame&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;전시 운영&quot;},&quot;idleSeconds&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:90,&quot;min&quot;:30,&quot;max&quot;:300,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;전시 운영&quot;},&quot;creditStart&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:300,&quot;min&quot;:0,&quot;max&quot;:2000,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;전시 운영&quot;},&quot;volatility&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.3,&quot;max&quot;:3,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;시세&quot;}}">
+const CROPS=[
+{id:'tomato',name:'토마토',en:'Tomato',unit:'500g',base:4800,a:0.8,gh:'A',c:'#D9533E',ch:'토'},
+{id:'paprika',name:'파프리카',en:'Paprika',unit:'2입',base:3600,a:0.6,gh:'A',c:'#D9862C',ch:'파'},
+{id:'mango',name:'애플망고',en:'Apple Mango',unit:'1입',base:12000,a:1,gh:'A',c:'#C99A22',ch:'애'},
+{id:'banana',name:'바나나',en:'Banana',unit:'1송이',base:5900,a:0.9,gh:'A',c:'#D9533E',ch:'바'},
+{id:'pineapple',name:'파인애플',en:'Pineapple',unit:'1통',base:8900,a:0.95,gh:'A',c:'#D9862C',ch:'파'},
+{id:'avocado',name:'아보카도',en:'Avocado',unit:'2입',base:5400,a:0.85,gh:'A',c:'#C99A22',ch:'아'},
+{id:'eggplant',name:'가지',en:'Eggplant',unit:'3입',base:3200,a:0.7,gh:'A',c:'#D9533E',ch:'가'},
+{id:'coconut',name:'코코넛',en:'Coconut',unit:'1통',base:7500,a:1,gh:'A',c:'#D9862C',ch:'코'},
+{id:'corn',name:'옥수수',en:'Corn',unit:'3입',base:4500,a:0.65,gh:'A',c:'#C99A22',ch:'옥'},
+{id:'sweetpotato',name:'고구마',en:'Sweet Potato',unit:'1kg',base:6200,a:0.6,gh:'A',c:'#D9533E',ch:'고'},
+{id:'kiwi',name:'골드키위',en:'Gold Kiwi',unit:'6입',base:7900,a:0.55,gh:'A',c:'#D9862C',ch:'골'},
+{id:'lemon',name:'레몬',en:'Lemon',unit:'3입',base:4900,a:0.75,gh:'A',c:'#C99A22',ch:'레'},
+{id:'strawberry',name:'딸기',en:'Strawberry',unit:'500g',base:9800,a:0.2,gh:'B',c:'#C8344B',ch:'딸'},
+{id:'cucumber',name:'오이',en:'Cucumber',unit:'3입',base:2900,a:0.35,gh:'B',c:'#4A8C40',ch:'오'},
+{id:'melon',name:'멜론',en:'Melon',unit:'1통',base:15000,a:0.45,gh:'B',c:'#7FA843',ch:'멜'},
+{id:'blueberry',name:'블루베리',en:'Blueberry',unit:'100g',base:6500,a:0.1,gh:'B',c:'#C8344B',ch:'블'},
+{id:'grape',name:'샤인머스캣',en:'Shine Muscat',unit:'1송이',base:13500,a:0.3,gh:'B',c:'#4A8C40',ch:'샤'},
+{id:'watermelon',name:'애플수박',en:'Apple Watermelon',unit:'1통',base:11000,a:0.4,gh:'B',c:'#7FA843',ch:'애'},
+{id:'peach',name:'복숭아',en:'Peach',unit:'4입',base:12500,a:0.15,gh:'B',c:'#C8344B',ch:'복'},
+{id:'cherry',name:'체리',en:'Cherry',unit:'200g',base:9900,a:0.05,gh:'B',c:'#4A8C40',ch:'체'},
+{id:'tangerine',name:'한라봉',en:'Hallabong',unit:'3입',base:8800,a:0.25,gh:'B',c:'#7FA843',ch:'한'},
+{id:'peanut',name:'땅콩',en:'Peanut',unit:'300g',base:5600,a:0.2,gh:'B',c:'#C8344B',ch:'땅'},
+{id:'pea',name:'완두콩',en:'Green Pea',unit:'300g',base:4300,a:0,gh:'B',c:'#4A8C40',ch:'완'},
+{id:'mushroom',name:'표고버섯',en:'Shiitake',unit:'200g',base:6900,a:-0.1,gh:'B',c:'#7FA843',ch:'표'},
+{id:'lettuce',name:'상추',en:'Lettuce',unit:'200g',base:2400,a:-0.8,gh:'C',c:'#5E9E4F',ch:'상'},
+{id:'broccoli',name:'브로콜리',en:'Broccoli',unit:'1송이',base:3500,a:-0.6,gh:'C',c:'#356E48',ch:'브'},
+{id:'potato',name:'감자',en:'Potato',unit:'1kg',base:4200,a:-0.5,gh:'C',c:'#A07A4A',ch:'감'},
+{id:'carrot',name:'당근',en:'Carrot',unit:'1kg',base:3900,a:-0.4,gh:'C',c:'#5E9E4F',ch:'당'},
+{id:'apple',name:'사과',en:'Apple',unit:'4입',base:9500,a:-0.45,gh:'C',c:'#356E48',ch:'사'},
+{id:'greenapple',name:'아오리사과',en:'Green Apple',unit:'4입',base:8700,a:-0.5,gh:'C',c:'#A07A4A',ch:'아'},
+{id:'pear',name:'배',en:'Pear',unit:'2입',base:9900,a:-0.4,gh:'C',c:'#5E9E4F',ch:'배'},
+{id:'garlic',name:'마늘',en:'Garlic',unit:'300g',base:5200,a:-0.7,gh:'C',c:'#356E48',ch:'마'},
+{id:'onion',name:'양파',en:'Onion',unit:'1kg',base:3300,a:-0.55,gh:'C',c:'#A07A4A',ch:'양'},
+{id:'ginger',name:'생강',en:'Ginger',unit:'200g',base:4600,a:-0.3,gh:'C',c:'#5E9E4F',ch:'생'},
+{id:'bean',name:'강낭콩',en:'Kidney Bean',unit:'300g',base:4800,a:-0.35,gh:'C',c:'#356E48',ch:'강'},
+{id:'chestnut',name:'밤',en:'Chestnut',unit:'500g',base:7200,a:-0.45,gh:'C',c:'#A07A4A',ch:'밤'},
+{id:'minari',name:'미나리',en:'Water Parsley',unit:'300g',base:4200,a:-0.4,gh:'D',c:'#4E9A6E',ch:'미'},
+{id:'shrimp',name:'민물새우',en:'Freshwater Shrimp',unit:'200g',base:8900,a:0.5,gh:'D',c:'#5A7F96',ch:'민'},
+{id:'tilapia',name:'틸라피아',en:'Tilapia',unit:'1마리',base:11000,a:0.6,gh:'D',c:'#C97A5E',ch:'틸'},
+{id:'pepper',name:'고추',en:'Chili Pepper',unit:'200g',base:3900,a:0.55,gh:'D',c:'#4E9A6E',ch:'고'},
+{id:'crayfish',name:'민물가재',en:'Crayfish',unit:'500g',base:16000,a:0.45,gh:'D',c:'#5A7F96',ch:'민'},
+{id:'crab',name:'참게',en:'Mitten Crab',unit:'3마리',base:18000,a:0.35,gh:'D',c:'#C97A5E',ch:'참'},
+{id:'trout',name:'송어',en:'Trout',unit:'1마리',base:13000,a:-0.6,gh:'D',c:'#4E9A6E',ch:'송'},
+{id:'sprout',name:'새싹채소',en:'Microgreens',unit:'100g',base:3500,a:-0.2,gh:'D',c:'#5A7F96',ch:'새'},
+{id:'watercress',name:'물냉이',en:'Watercress',unit:'150g',base:3800,a:-0.5,gh:'D',c:'#C97A5E',ch:'물'},
+{id:'rice',name:'쌀',en:'Rice',unit:'1kg',base:6800,a:0.3,gh:'D',c:'#4E9A6E',ch:'쌀'},
+{id:'snail',name:'우렁이',en:'Pond Snail',unit:'300g',base:9200,a:0.2,gh:'D',c:'#5A7F96',ch:'우'},
+{id:'lotus',name:'연근',en:'Lotus Root',unit:'500g',base:6400,a:-0.1,gh:'D',c:'#C97A5E',ch:'연'}].map(c=>({...c,img:'crops/'+c.id+'.svg'}));
+const GH={A:{name:'고온 온실',en:'Hot house',range:'28–32°C',t0:26,k:6},B:{name:'중온 온실',en:'Temperate',range:'20–24°C',t0:19,k:4},C:{name:'저온 온실',en:'Cool house',range:'15–18°C',t0:14,k:3},D:{name:'아쿠아포닉스',en:'Aquaponics',range:'수온 22–26°C',t0:21,k:4}};
+const ADDR=[
+{key:'stn',name:'판교역',en:'Pangyo Stn.',dist:'0.9km',km:0.9,min:6},
+{key:'tv',name:'판교테크노밸리',en:'Techno Valley',dist:'1.3km',km:1.3,min:9},
+{key:'jeongja',name:'정자역',en:'Jeongja Stn.',dist:'5km',km:5,min:22}];
+const MEMOS=['문 앞에 놔주세요','직접 받을게요','도착 전 알림 주세요'];
+const METHODS=['신용카드','간편결제','교통카드 태그'];
+const UP='#D9443F',DN='#2F5FD0',FLAT='#5B6662';
+const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const mkLine=(arr,w,h,p,mn,mx)=>{mn=mn??Math.min(...arr);mx=mx??Math.max(...arr);const r=(mx-mn)||1;return arr.map((v,i)=>(i?'L':'M')+(i*(w/(arr.length-1))).toFixed(1)+' '+(p+(h-2*p)*(1-(v-mn)/r)).toFixed(1)).join(' ');};
+const fmtChg=(v,o)=>{const p=(v-o)/o*100;return {txt:(p>0.005?'+':p<-0.005?'−':'')+Math.abs(p).toFixed(2)+'%',color:p>0.005?UP:p<-0.005?DN:FLAT,p};};
+const clock=t=>{const d=new Date(t);let h=d.getHours();const m=String(d.getMinutes()).padStart(2,'0');const ap=h<12?'오전':'오후';h=h%12||12;return ap+' '+h+':'+m;};
+
+class Component extends DCLogic {
+  constructor(p){super(p);
+    this.frameRef=React.createRef();this.mapRef=React.createRef();this.scrollRef=React.createRef();
+    this.mk={t:0,H:55,heat:[],hist:{},open:{}};
+    CROPS.forEach(c=>this.mk.hist[c.id]=[c.base]);
+    for(let i=0;i<80;i++)this.step();
+    CROPS.forEach(c=>this.mk.open[c.id]=this.mk.hist[c.id][0]);
+    this.imgOk={};this.last=Date.now();
+    this.state={...this.fresh(),scale:1,tick:0};
+    const pc=['#1FBF92','#7CF0CF','#0A7F60','#BFF3E2','#3FDDB0'];
+    this.burst=Array.from({length:14},(_,i)=>{const a=i/14*Math.PI*2;return {c:pc[i%5],x:Math.cos(a)*104,y:Math.sin(a)*104,x2:Math.cos(a)*150,y2:Math.sin(a)*150};});
+  }
+  fresh(){return {screen:'intro',creditModal:false,tab:'market',page:null,filter:'all',cart:{},watch:[],watchRef:{},notifs:[],orders:[],hc:this.props.creditStart??300,co:{mode:'pickup',addr:0,memo:0,method:0,hcUse:null},qty:1,toast:null,notifOpen:false,paying:false,fly:null,cartPulse:false,resetModal:false,idleLeft:0};}
+  step(){const m=this.mk;m.t++;const t=m.t;const vol=this.props?.volatility??1;
+    m.H=clamp(52+30*Math.sin(t/32)+11*Math.sin(t/8.7)+(Math.random()-.5)*8,6,98);
+    m.heat.push(m.H);if(m.heat.length>80)m.heat.shift();
+    const dev=(m.H-50)/50;
+    CROPS.forEach(c=>{const h=m.hist[c.id];const prev=h[h.length-1];const target=c.base*(1-0.3*vol*c.a*dev);const nv=prev+(target-prev)*0.14+prev*(Math.random()-.5)*0.014*vol;h.push(Math.round(nv/10)*10);if(h.length>80)h.shift();});
+  }
+  price(id){const h=this.mk.hist[id];return h[h.length-1];}
+  componentDidMount(){
+    const fit=()=>{const dev=this.devOn();this.setState({dev,scale:dev?Math.min(window.innerWidth/(890+48),window.innerHeight/(1250+90)):Math.min(window.innerWidth/834,window.innerHeight/1194)});};
+    fit();window.addEventListener('resize',fit);this._fit=fit;
+    CROPS.forEach(c=>{const im=new Image();im.onload=()=>{this.imgOk[c.id]=true;this.forceUpdate();};im.src=c.img;});
+    this.iv=setInterval(()=>this.onTick(),1500);
+    this.iv2=setInterval(()=>this.onSecond(),1000);
+  }
+  componentDidUpdate(){this.postMap();}
+  postMap(){const f=this.mapRef.current;if(f&&f.contentWindow&&this._mapMsg)f.contentWindow.postMessage(this._mapMsg,'*');}
+  componentWillUnmount(){clearTimeout(this.sqT);clearInterval(this.iv);clearInterval(this.iv2);window.removeEventListener('resize',this._fit);clearTimeout(this.toT);}
+  notify(title,body,target){const n={id:Math.random(),title,body,target,time:Date.now(),read:false};this.setState(s=>({notifs:[n,...s.notifs].slice(0,30),toast:n}));clearTimeout(this.toT);this.toT=setTimeout(()=>this.setState({toast:null}),3200);}
+  onTick(){
+    const prevH=this.mk.H;this.step();const H=this.mk.H;const s=this.state;
+    if(s.screen==='app'){
+      if(prevH<80&&H>=80)this.notify('폐열 피크','AI 연산이 늘어 폐열이 증가했어요. 고온 작물 가격이 내려가는 중입니다.',{tab:'market'});
+      if(prevH>25&&H<=25)this.notify('폐열 감소','서버 부하가 낮아졌어요. 저온 작물 가격이 내려가는 중입니다.',{tab:'market'});
+      const ref={...s.watchRef};let ch=false;
+      s.watch.forEach(id=>{const p=this.price(id);const r=ref[id]||p;const d=(p-r)/r*100;if(Math.abs(d)>=3){const c=CROPS.find(x=>x.id===id);this.notify(`${c.name} ${d>0?'상승':'하락'} ${Math.abs(d).toFixed(1)}%`,`관심 작물 ${c.name}이(가) ${won(p)}에 거래되고 있어요.`,{crop:id});ref[id]=p;ch=true;}});
+      const orders=s.orders.map(o=>{const st=this.stageOf(o);if(st!==o.stage){const lbl=this.stageLabels(o)[st];if(st>0)this.notify(`주문 #${o.no} · ${lbl.label}`,this.stageMsg(o,st),{order:o.no});return {...o,stage:st};}return o;});
+      this.setState({tick:s.tick+1,orders,...(ch?{watchRef:ref}:{})});
+    } else this.setState({tick:s.tick+1});
+  }
+  onSecond(){const s=this.state;const lim=(this.props.idleSeconds??90)*1000;
+    if(s.screen!=='app'){if(s.creditModal&&Date.now()-this.last>lim)this.doReset();return;}
+    const el=Date.now()-this.last;
+    if(el>=lim)this.doReset();else if(el>=lim-10000)this.setState({idleLeft:Math.ceil((lim-el)/1000)});else if(s.idleLeft)this.setState({idleLeft:0});
+    if(s.page&&s.page.type==='track')this.forceUpdate();
+  }
+  stageLabels(o){return o.mode==='delivery'?[{label:'주문 접수',en:'Received'},{label:'수확·포장',en:'Harvest & pack'},{label:'배달 중',en:'On the way'},{label:'배달 완료',en:'Delivered'}]:[{label:'주문 접수',en:'Received'},{label:'수확·포장',en:'Harvest & pack'},{label:'픽업 준비 완료',en:'Ready'},{label:'수령 완료',en:'Picked up'}];}
+  prog(o){return clamp((Date.now()-o.start)/o.dur,0,1);}
+  stageOf(o){const p=this.prog(o);if(o.mode==='delivery')return p<0.12?0:p<0.3?1:p<1?2:3;if(o.picked)return 3;return p<0.25?0:p<1?1:2;}
+  stageMsg(o,st){if(o.mode==='delivery')return ['','온실에서 작물을 수확해 포장하고 있어요.','라이더가 출발했어요. 약 '+Math.max(1,Math.ceil((1-this.prog(o))*o.min))+'분 후 도착 예정이에요.','배달이 완료되었어요.'][st];return ['','온실에서 작물을 수확해 포장하고 있어요.',`픽업번호 ${o.pickNo} · 인증 코드 ${o.code}`,'수령이 완료되었어요.'][st];}
+  devOn(){if(this.props.deviceFrame===false)return false;const touch=window.matchMedia&&window.matchMedia('(pointer: coarse)').matches;return !(touch&&window.innerWidth<=1100);}
+  touch=()=>{this.last=Date.now();if(this.state.idleLeft)this.setState({idleLeft:0});};
+  doReset=()=>{this.last=Date.now();clearTimeout(this.toT);this.setState({...this.fresh()});};
+  go(tab){if(tab!==this.state.tab){this.setState({squish:true});clearTimeout(this.sqT);this.sqT=setTimeout(()=>this.setState({squish:false}),200);}this.setState({tab,page:null,notifOpen:false});if(this.scrollRef.current)this.scrollRef.current.scrollTop=0;}
+  openPage(page){const t=page.type==='track'?'orders':page.type==='checkout'?'cart':null;if(t&&t!==this.state.tab){this.setState({squish:true});clearTimeout(this.sqT);this.sqT=setTimeout(()=>this.setState({squish:false}),200);}this.setState({page,notifOpen:false,qty:1,...(t?{tab:t}:{})});if(this.scrollRef.current)this.scrollRef.current.scrollTop=0;}
+  toggleWatch(id){this.setState(s=>{const on=s.watch.includes(id);const ref={...s.watchRef};if(!on)ref[id]=this.price(id);return {watch:on?s.watch.filter(x=>x!==id):[...s.watch,id],watchRef:ref};});}
+  addCart(id,qty,e){
+    const c=CROPS.find(x=>x.id===id);
+    this.setState(s=>({cart:{...s.cart,[id]:(s.cart[id]||0)+qty}}));
+    const fr=this.frameRef.current;let x=417,y=600;
+    if(fr&&e&&e.clientX!=null){const r=fr.getBoundingClientRect();const sc=this.state.scale||1;x=(e.clientX-r.left)/sc;y=(e.clientY-r.top)/sc;}
+    this.setState({fly:{x,y,c:c.c,go:false}});
+    setTimeout(()=>this.setState(s=>s.fly?{fly:{...s.fly,go:true}}:null),30);
+    setTimeout(()=>{this.setState({fly:null,cartPulse:true});setTimeout(()=>this.setState({cartPulse:false}),280);},700);
+  }
+  cartTotal(){return Object.entries(this.state.cart).reduce((a,[id,q])=>a+this.price(id)*q,0);}
+  pay(){
+    const s=this.state;const sub=this.cartTotal();const fee=s.co.mode==='delivery'?2500:0;const tot=sub+fee;
+    const hcMax=Math.min(s.hc,Math.floor(tot/100)*10);const hcUse=Math.min(s.co.hcUse??hcMax,hcMax);
+    this.setState({paying:true});
+    setTimeout(()=>{
+      const a=ADDR[s.co.addr];const no=String(Math.floor(1000+Math.random()*9000));
+      const items=Object.entries(s.cart).map(([id,qty])=>({id,qty,price:this.price(id)}));
+      const o={no,items,sub,fee,hcUse,krw:tot-hcUse*10,mode:s.co.mode,addr:s.co.addr,memo:s.co.memo,method:s.co.method,start:Date.now(),dur:s.co.mode==='delivery'?150000:50000,min:a.min,stage:0,pickNo:String(100+Math.floor(Math.random()*900)),code:String(Math.floor(1000+Math.random()*9000)),picked:false};
+      this.setState(st=>({paying:false,cart:{},hc:st.hc-hcUse,orders:[o,...st.orders],page:{type:'paid',no},co:{...st.co,hcUse:null}}));
+      this.notify('결제 완료',`주문 #${no}이 접수되었어요. ${o.mode==='delivery'?'배달':'픽업'} 현황을 확인해보세요.`,{order:no});
+    },1500);
+  }
+  openNotifTarget(t){if(!t)return;if(t.crop)this.openPage({type:'detail',id:t.crop});else if(t.order)this.openPage({type:'track',no:t.order});else if(t.tab)this.go(t.tab);}
+
+  renderVals(){
+    const s=this.state,m=this.mk,H=m.H;
+    const heatKw=Math.round(H*12.4);
+    const rowOf=(c)=>{const p=this.price(c.id),ch=fmtChg(p,m.open[c.id]);const on=s.watch.includes(c.id);
+      return {name:c.name,en:c.en,unit:c.unit,gh:GH[c.gh].name,price:won(p),chg:ch.txt,chgColor:ch.color,spark:mkLine(m.hist[c.id].slice(-40),100,40,4),tc:c.c,ch:c.ch,imgUrl:this.imgOk[c.id]?`url(${c.img})`:'none',imgBg:this.imgOk[c.id]?'#EEF2F0':'transparent',
+        open:()=>this.openPage({type:'detail',id:c.id}),heartFill:on?'#D9443F':'none',heartStroke:on?'#D9443F':'#7A8581',
+        toggleWatch:(e)=>{e.stopPropagation();this.toggleWatch(c.id);},add:(e)=>{e.stopPropagation();this.addCart(c.id,1,e);}};};
+    const page=s.page;const tab=s.tab;
+    const cartCount=Object.values(s.cart).reduce((a,b)=>a+b,0);
+    const unread=s.notifs.filter(n=>!n.read).length;
+    const activeOrders=s.orders.filter(o=>o.stage<3).length;
+    const tabs={};
+    ['market','greens','watch','cart','orders'].forEach(id=>{const act=tab===id&&(!page||(id==='cart'&&page.type==='checkout')||(id==='orders'&&page.type==='track'));const badge=id==='cart'?Object.keys(s.cart).length:id==='watch'?s.watch.length:id==='orders'?activeOrders:0;
+      tabs[id]={color:act?'#0A5E47':'#4F5A56',bar:act?'#1FBF92':'transparent',onClick:()=>this.go(id),hasBadge:badge>0,badge,scale:id==='cart'&&s.cartPulse?1.4:1};});
+    const filters=[['all','전체']].concat(Object.entries(GH).map(([k,g])=>[k,g.name])).map(([k,l])=>{const on=s.filter===k;return {label:l,bg:on?'#121816':'#FBFCFC',fg:on?'#fff':'#121816',border:on?'#121816':'#D3D9D7',onClick:()=>this.setState({filter:k})};});
+    const rows=CROPS.filter(c=>s.filter==='all'||c.gh===s.filter).map(rowOf);
+    const heatLine=mkLine(m.heat,720,96,8,0,100);
+    const heatNow=H>=65?'폐열이 많아요. 토마토·망고 등 고온 작물이 저렴해지는 중':H<=35?'폐열이 적어요. 상추·브로콜리 등 저온 작물이 저렴해지는 중':'폐열 공급이 안정적이에요. 시세 보합';
+    const shares={A:40+H*0.1,B:25,C:Math.max(4,14-H*0.08),D:25};const tot=Object.values(shares).reduce((a,b)=>a+b,0);
+    const ghCards=Object.entries(GH).map(([id,g])=>{const sh=Math.round(shares[id]/tot*100);const temp=(g.t0+g.k*H/100).toFixed(1);
+      return {id,name:g.name,en:g.en,range:g.range,temp,label:id==='D'?'수온':'기온',share:sh,bar:sh*2,kw:Math.round(heatKw*sh/100),
+        crops:CROPS.filter(c=>c.gh===id).map(c=>{const p=this.price(c.id),ch=fmtChg(p,m.open[c.id]);return {name:c.name,price:won(p),chg:ch.txt,chgColor:ch.color,tc:c.c};}),
+        view:()=>{this.setState({filter:id});this.go('market');}};});
+    ghCards.forEach(g=>{g.top=[...g.crops].sort((x,y)=>Math.abs(parseFloat(y.chg.replace('−','-')))-Math.abs(parseFloat(x.chg.replace('−','-')))).slice(0,3);g.count=g.crops.length;});
+    const flowLines=[0,1,2,3].map(i=>({d:`M174 84 C330 84 350 ${27+i*38} 496 ${27+i*38}`,c:i===0?'#E0892E':i===2?'#4E9F5E':'#1FBF92',w:2+Math.round(ghCards[i].share/12),s:Math.max(.4,1.6-H/80)}));
+    const watchRows=CROPS.filter(c=>s.watch.includes(c.id)).map(rowOf);
+    const cartRows=Object.entries(s.cart).map(([id,q])=>{const c=CROPS.find(x=>x.id===id);const p=this.price(id);const ch=fmtChg(p,m.open[id]);
+      return {name:c.name,unit:c.unit,tc:c.c,ch:c.ch,imgUrl:this.imgOk[c.id]?`url(${c.img})`:'none',imgBg:this.imgOk[c.id]?'#EEF2F0':'transparent',qty:q,price:won(p),chg:ch.txt,chgColor:ch.color,line:won(p*q),
+        inc:()=>this.setState(st=>({cart:{...st.cart,[id]:st.cart[id]+1}})),dec:()=>this.setState(st=>{const n={...st.cart};if(n[id]>1)n[id]--;else delete n[id];return {cart:n};}),
+        remove:()=>this.setState(st=>{const n={...st.cart};delete n[id];return {cart:n};})};});
+    const sub=this.cartTotal();
+    const orderRows=s.orders.map(o=>{const st=this.stageOf(o);const lbl=this.stageLabels(o)[st].label;const c0=CROPS.find(x=>x.id===o.items[0].id);const done=st===3;
+      const eta=o.mode==='delivery'?(done?'완료':'약 '+Math.max(1,Math.ceil((1-this.prog(o))*o.min))+'분 남음'):(st===2?'픽업번호 '+o.pickNo:done?'완료':'약 '+Math.max(1,Math.ceil((1-this.prog(o))*8))+'분 남음');
+      return {no:o.no,title:c0.name+(o.items.length>1?` 외 ${o.items.length-1}건`:''),time:clock(o.start),total:won(o.krw)+(o.hcUse?` + ${o.hcUse} HC`:''),status:lbl,eta,
+        modeShort:o.mode==='delivery'?'배달':'픽업',iconBg:done?'#EEF1F0':'#121816',iconFg:done?'#7A8581':'#7CF0CF',chipBg:done?'#EEF1F0':'#E2F7EF',chipFg:done?'#5B6662':'#0A7F60',open:()=>this.openPage({type:'track',no:o.no})};});
+    let d={};
+    if(page&&page.type==='detail'){const c=CROPS.find(x=>x.id===page.id);const h=m.hist[c.id];const p=this.price(c.id);const o=m.open[c.id];const ch=fmtChg(p,o);
+      const mn=Math.min(...h,o),mx=Math.max(...h,o);const W=720,Hh=230,pad=14;const line=mkLine(h,W,Hh,pad,mn,mx);const yOf=v=>pad+(Hh-2*pad)*(1-(v-mn)/((mx-mn)||1));
+      const on=s.watch.includes(c.id);const press=c.a*(H-50)/50;
+      d={name:c.name,en:c.en,unit:c.unit,tc:c.c,ch:c.ch,imgUrl:this.imgOk[c.id]?`url(${c.img})`:'none',imgBg:this.imgOk[c.id]?'#EEF2F0':'transparent',gh:GH[c.gh].name,price:won(p),chgColor:ch.color,chgFull:(p-o>=0?'+':'−')+won(Math.abs(p-o))+'  '+ch.txt,
+        line,area:line+` L${W} ${Hh} L0 ${Hh} Z`,areaFill:ch.p>=0?'rgba(217,68,63,.07)':'rgba(47,95,208,.07)',openY:yOf(o).toFixed(1),lastX:W,lastY:yOf(p).toFixed(1),lastXm:W-12,lastYm:(yOf(p)-12).toFixed(1),
+        high:won(Math.max(...h)),low:won(Math.min(...h)),open:won(o),
+        type:c.a>0.3?'고온 선호':c.a<-0.3?'저온 선호':'열 중립',typeBg:c.a>0.3?'#FBEBD9':c.a<-0.3?'#E1F0E3':'#E2F7EF',typeFg:c.a>0.3?'#9A5612':c.a<-0.3?'#2F6B3B':'#0A7F60',affPos:Math.round((c.a+1)/2*100),
+        desc:c.a>0.3?'폐열이 늘어나면 온실 온도가 올라가 생육이 빨라지고 수확량이 늘어납니다. 공급이 늘면 가격은 내려가요.':c.a<-0.3?'폐열이 늘어나면 온실 냉방 부담이 커져 생육이 느려지고 수확량이 줄어듭니다. 공급이 줄면 가격은 올라가요.':'폐열 변화에 큰 영향을 받지 않아 비교적 안정적인 시세를 보입니다.',
+        press:press>0.12?'공급 증가, 가격 하락 압력':press<-0.12?'공급 감소, 가격 상승 압력':'시세 보합',pressColor:press>0.12?DN:press<-0.12?UP:FLAT,
+        watchLabel:on?'관심 작물':'관심 등록',heartFill:on?'#D9443F':'none',watchBg:on?'#FBECEB':'#FBFCFC',watchFg:on?'#C23A35':'#121816',watchBorder:on?'#F0C4C2':'#D3D9D7',
+        toggleWatch:()=>this.toggleWatch(c.id),qty:s.qty,total:won(p*s.qty),
+        inc:()=>this.setState(st=>({qty:Math.min(20,st.qty+1)})),dec:()=>this.setState(st=>({qty:Math.max(1,st.qty-1)})),
+        add:(e)=>this.addCart(c.id,s.qty,e),buy:()=>{this.setState(st=>({cart:{...st.cart,[c.id]:(st.cart[c.id]||0)+st.qty},tab:'cart'}));this.openPage({type:'checkout'});}};}
+    const fee=s.co.mode==='delivery'?2500:0;const total=sub+fee;const hcMax=Math.min(s.hc,Math.floor(total/100)*10);const hcUse=Math.min(s.co.hcUse??hcMax,hcMax);
+    const setCo=(k,v)=>this.setState(st=>({co:{...st.co,[k]:v}}));
+    const co={isDel:s.co.mode==='delivery',isPick:s.co.mode==='pickup',
+      modes:[['pickup','픽업','1F HEAT EXCHANGE · 무료'],['delivery','배달','전시장 인근 · 배달비 2,500원']].map(([k,l,sb])=>{const on=s.co.mode===k;return {label:l,sub:sb,border:on?'#0A7F60':'#D3D9D7',bg:on?'#E2F7EF':'#FBFCFC',onClick:()=>setCo('mode',k)};}),
+      addrs:ADDR.map((a,i)=>{const on=s.co.addr===i;return {name:a.name,en:a.en,dist:a.dist,min:a.min,border:on?'#0A7F60':'#D3D9D7',bg:on?'#E2F7EF':'#FBFCFC',dot:on?'#0A7F60':'#C9D0CD',dotIn:on?'#0A7F60':'transparent',onClick:()=>setCo('addr',i)};}),
+      memos:MEMOS.map((l,i)=>{const on=s.co.memo===i;return {label:l,bg:on?'#121816':'#FBFCFC',fg:on?'#fff':'#121816',border:on?'#121816':'#D3D9D7',onClick:()=>setCo('memo',i)};}),
+      methods:METHODS.map((l,i)=>{const on=s.co.method===i;return {label:l,border:on?'#0A7F60':'#D3D9D7',bg:on?'#E2F7EF':'#FBFCFC',onClick:()=>setCo('method',i)};}),
+      hcMax,hcUse,onHc:(e)=>setCo('hcUse',Number(e.target.value)),hcNone:()=>setCo('hcUse',0),hcAll:()=>setCo('hcUse',hcMax),
+      subtotal:won(sub),feeLabel:s.co.mode==='delivery'?'배달비':'픽업',fee:fee?won(fee):'무료',discount:won(hcUse*10)+` (${hcUse} HC)`,final:won(total-hcUse*10),
+      payLabel:won(total-hcUse*10)+' 결제하기',pay:()=>{if(sub>0)this.pay();}};
+    let pd={},tr={};
+    if(page&&page.type==='paid'){const o=s.orders.find(x=>x.no===page.no);if(o){const kwh=o.items.reduce((a,it)=>a+it.qty*(CROPS.find(c=>c.id===it.id).a>0?1.4:0.7),0);
+      pd={no:o.no,modeLabel:o.mode==='delivery'?'배달지':'픽업',dest:o.mode==='delivery'?ADDR[o.addr].name:'1F 스마트 픽업 존',eta:o.mode==='delivery'?`약 ${o.min}분 · ${clock(o.start+o.min*60000)} 도착`:'약 8분',
+        paid:won(o.krw)+(o.hcUse?` + ${o.hcUse} HC`:''),kwh:kwh.toFixed(1),track:()=>this.openPage({type:'track',no:o.no}),trackLabel:o.mode==='delivery'?'배달 현황 보기':'픽업 현황 보기'};}}
+    if(page&&page.type==='track'){const o=s.orders.find(x=>x.no===page.no);if(o){const st=this.stageOf(o);const p=this.prog(o);const L=this.stageLabels(o);
+      const steps=L.map((l,i)=>{const done=i<st||st===3;return {n:String(i+1),done,todo:!done,label:l.label,en:l.en,bg:i<=st?'#5FE3BE':'#FBFCFC',border:i<=st?'#1FBF92':'#D3D9D7',fg:i<=st?'#121816':'#8D9894'};});
+      const items=o.items.map(it=>({name:CROPS.find(c=>c.id===it.id).name,qty:it.qty,line:won(it.price*it.qty)}));
+      tr={no:o.no,steps,items,paid:won(o.krw)+(o.hcUse?` + ${o.hcUse} HC`:''),isDel:o.mode==='delivery',isPick:o.mode==='pickup',status:L[st].label};
+      if(o.mode==='delivery'){const a=ADDR[o.addr];const dp=clamp((p-0.3)/0.7,0,1);this._mapMsg={type:'hx-map',dest:a.key,p:dp};
+        const mins=Math.max(1,Math.ceil((1-p)*o.min));
+        Object.assign(tr,{remain:st===3?'0 km':(a.km*(1-dp)).toFixed(1)+' km',memo:MEMOS[o.memo],arrive:clock(Date.now()+mins*60000),
+          headline:st===3?'배달이 완료되었어요':`도착까지 약 ${mins}분`,sub:st===3?`${a.name}에 도착했어요 · ${MEMOS[o.memo]}`:st<2?'온실에서 수확·포장 후 라이더가 출발해요':`${a.name}(으)로 이동 중 · ${a.dist}`,pct:Math.round(p*100)});
+      } else {const mins=Math.max(1,Math.ceil((1-p)*8));const ready=st>=2;
+        Object.assign(tr,{pickNo:o.pickNo,code:ready?o.code:'····',codeColor:ready?'#121816':'#8D9894',canPick:st===2,
+          pickup:()=>{this.setState(ss=>({orders:ss.orders.map(x=>x.no===o.no?{...x,picked:true,stage:3}:x)}));this.notify(`주문 #${o.no} · 수령 완료`,'픽업이 완료되었어요. 맛있게 드세요.',{order:o.no});},
+          headline:st===3?'수령 완료':ready?'픽업 준비 완료':`준비까지 약 ${mins}분`,sub:st===3?'이용해주셔서 감사합니다.':ready?'픽업 존에서 픽업번호와 인증 코드를 입력해 주세요.':'수확·포장이 끝나면 픽업번호와 인증 코드를 알려드려요.',pct:st===3?100:Math.round(p*100)});}
+    }}
+    const notifs=s.notifs.map(n=>{const ago=Math.round((Date.now()-n.time)/1000);return {title:n.title,body:n.body,time:ago<60?ago+'초 전':Math.floor(ago/60)+'분 전',bg:n.read?'#FBFCFC':'#F0FAF6',dot:n.read?'#D3D9D7':'#1FBF92',
+      open:()=>{this.setState(st=>({notifs:st.notifs.map(x=>x.id===n.id?{...x,read:true}:x)}));this.openNotifTarget(n.target);}};});
+    const fly=s.fly;
+    const tickerItems=[...CROPS,...CROPS].map(c=>{const p=this.price(c.id),ch=fmtChg(p,m.open[c.id]);return {name:c.name,price:won(p),chg:ch.txt,color:ch.color};});
+    return {
+      mapRef:this.mapRef,onMapLoad:()=>this.postMap(),scale:s.scale,showDevice:!!s.dev,bezel:s.dev?28:0,devR:s.dev?52:0,scrR:s.dev?20:0,devShadow:s.dev?'inset 0 0 0 2px #3A3F3D,0 40px 80px -30px rgba(0,0,0,.45)':'none',frameRef:this.frameRef,scrollRef:this.scrollRef,onFrameDown:this.touch,
+      isIntro:s.screen==='intro',isApp:s.screen==='app',creditModal:s.creditModal,creditStart:this.props.creditStart??300,
+      startExp:()=>this.setState({creditModal:true}),enterApp:()=>this.setState({screen:'app',creditModal:false,tab:'market',page:null}),
+      tickerItems,burst:this.burst,heatOpacity:(0.2+H/100*0.8).toFixed(2),
+      heatKw:heatKw.toLocaleString('ko-KR'),aiLoad:Math.round(H),hc:s.hc,hcWon:won(s.hc*10),unread,hasUnread:unread>0,
+      notifOpen:s.notifOpen,openNotif:()=>this.setState(st=>({notifOpen:!st.notifOpen,toast:null})),closeNotif:()=>this.setState({notifOpen:false}),stop:(e)=>e.stopPropagation(),
+      readAll:()=>this.setState(st=>({notifs:st.notifs.map(n=>({...n,read:true}))})),notifs,noNotifs:notifs.length===0,
+      askReset:()=>this.setState({resetModal:true}),cancelReset:()=>this.setState({resetModal:false}),doReset:this.doReset,resetModal:s.resetModal,
+      idleShow:s.idleLeft>0,idleLeft:s.idleLeft,keepGoing:this.touch,
+      showMarket:!page&&tab==='market',showGreens:!page&&tab==='greens',showWatch:!page&&tab==='watch',showCart:!page&&tab==='cart',showOrders:!page&&tab==='orders',
+      showDetail:page?.type==='detail',showCheckout:page?.type==='checkout',showPaid:page?.type==='paid'&&!!pd.no,showTrack:page?.type==='track'&&!!tr.no,
+      heatLine,heatNow,filters,rows,ghCards,flowLines,
+      watchRows,hasWatch:watchRows.length>0,noWatch:watchRows.length===0,
+      cartRows,hasCart:cartRows.length>0,noCart:cartRows.length===0,cartCount,cartSubtotal:won(sub),
+      goCheckout:()=>this.openPage({type:'checkout'}),backToCart:()=>this.go('cart'),goMarket:()=>this.go('market'),goOrders:()=>this.go('orders'),
+      back:()=>this.setState({page:null}),
+      orderRows,hasOrders:orderRows.length>0,noOrders:orderRows.length===0,
+      d,co,pd,tr,tabs,paying:s.paying,tabW:154.8,tabX:(['market','greens','watch','cart','orders'].indexOf(tab)*154.8).toFixed(1),tabSx:s.squish?1.12:1,tabSy:s.squish?0.9:1,
+      flyShow:!!fly,flyX:fly?(fly.go?572:fly.x):0,flyY:fly?(fly.go?1135:fly.y):0,flyC:fly?fly.c:'#1FBF92',flyS:fly&&fly.go?0.45:1,flyR:fly&&fly.go?90:0,
+      hasToast:!!s.toast&&!s.notifOpen,toast:s.toast||{},toastOpen:()=>{const t=s.toast;if(!t)return;this.setState(st=>({toast:null,notifs:st.notifs.map(x=>x.id===t.id?{...x,read:true}:x)}));this.openNotifTarget(t.target);}
+    };
+  }
+}
+</script>
+</body>
+</html>

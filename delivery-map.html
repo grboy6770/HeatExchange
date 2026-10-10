@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+html,body,#map{margin:0;height:100%;background:#E8ECEA;font-family:Pretendard,sans-serif;}
+.leaflet-tile-pane{filter:grayscale(1) contrast(.45) brightness(1.25) blur(.4px);opacity:.38;}
+#map{background:#EEF1F0;}
+.leaflet-control-attribution{font-size:10px;background:rgba(251,252,252,.85)!important;}
+.lbl{background:#5FE3BE;color:#08281E;font-weight:800;font-size:13px;padding:6px 10px;border-radius:8px;white-space:nowrap;box-shadow:0 6px 14px -8px rgba(0,0,0,.45);transform:translate(-50%,-130%);display:inline-block;}
+.dst{width:22px;height:22px;border-radius:50% 50% 50% 0;transform:translate(-50%,-100%) rotate(-45deg);background:#D9443F;border:3px solid #fff;box-sizing:border-box;box-shadow:0 4px 10px -4px rgba(0,0,0,.5);}
+.dstl{background:#FBFCFC;color:#121816;font-weight:700;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid #D3D9D7;white-space:nowrap;transform:translate(-50%,-260%);display:inline-block;}
+.rider{position:relative;width:30px;height:30px;transform:translate(-50%,-50%);}
+.rider b{position:absolute;inset:0;border-radius:50%;background:#5FE3BE;border:3px solid #fff;box-sizing:border-box;box-shadow:0 4px 10px -4px rgba(0,0,0,.5);}
+.rider i{position:absolute;inset:-12px;border-radius:50%;background:rgba(31,191,146,.35);animation:r 1.6s ease-out infinite;}
+@keyframes r{0%{transform:scale(.5);opacity:.8}100%{transform:scale(1.3);opacity:0}}
+</style></head><body><div id="map"></div>
+<script>
+const ORIGIN=[37.395666,127.104548];
+const ROUTES={"stn":{"km":0.9,"coords":[[37.395586,127.106767],[37.39559,127.10677],[37.39571,127.10684],[37.39579,127.10687],[37.39583,127.10689],[37.39608,127.10698],[37.39619,127.10703],[37.39618,127.10711],[37.39618,127.10754],[37.39618,127.10761],[37.39619,127.10944],[37.3962,127.10968],[37.39605,127.10967],[37.39528,127.10967],[37.39494,127.10967],[37.39467,127.10967],[37.39375,127.10966],[37.39374,127.10991],[37.39372,127.11035],[37.39372,127.11053],[37.39372,127.11082],[37.39371,127.11118],[37.39371,127.11143],[37.39371,127.11153]]},"tv":{"km":1.3,"coords":[[37.395586,127.106767],[37.39559,127.10677],[37.39571,127.10684],[37.39579,127.10687],[37.39583,127.10689],[37.39608,127.10698],[37.39619,127.10703],[37.39626,127.10705],[37.39659,127.1071],[37.39682,127.10712],[37.39738,127.10718],[37.39798,127.10718],[37.39844,127.10708],[37.39861,127.10705],[37.39862,127.10705],[37.39883,127.107],[37.39937,127.1068],[37.39972,127.10664],[37.39984,127.10658],[37.40074,127.10616],[37.402,127.10561],[37.40281,127.10526],[37.40291,127.10526],[37.40296,127.10528],[37.403,127.1053],[37.40303,127.10533],[37.40306,127.10539],[37.40319,127.10585],[37.40319,127.10648],[37.4032,127.108]]},"jeongja":{"km":5,"coords":[[37.395586,127.106767],[37.39559,127.10677],[37.39571,127.10684],[37.39579,127.10687],[37.39583,127.10689],[37.39608,127.10698],[37.39619,127.10703],[37.39623,127.10684],[37.39612,127.10678],[37.39605,127.10676],[37.39591,127.10668],[37.39572,127.10656],[37.39518,127.10623],[37.39484,127.10602],[37.39469,127.10591],[37.39442,127.10567],[37.3942,127.10527],[37.39395,127.10494],[37.39377,127.10462],[37.39344,127.10408],[37.39323,127.10373],[37.39301,127.10343],[37.3929,127.10326],[37.39284,127.10317],[37.39278,127.1031],[37.39273,127.10303],[37.39266,127.10295],[37.39261,127.10288],[37.39255,127.10281],[37.39248,127.10274],[37.39245,127.1027],[37.39236,127.10261],[37.39228,127.10252],[37.3922,127.10245],[37.39212,127.10237],[37.39197,127.10225],[37.39169,127.10202],[37.39142,127.10179],[37.39108,127.10162],[37.39062,127.10145],[37.3904,127.10139],[37.39008,127.10136],[37.39005,127.10136],[37.38978,127.10136],[37.3892,127.10148],[37.38886,127.1015],[37.38838,127.10161],[37.38827,127.10164],[37.38779,127.1018],[37.38732,127.102],[37.38709,127.10209],[37.38673,127.10218],[37.38661,127.10221],[37.38603,127.10231],[37.38496,127.1025],[37.38461,127.10239],[37.38397,127.10237],[37.38316,127.10228],[37.38262,127.10222],[37.38182,127.10216],[37.38178,127.10216],[37.38162,127.10215],[37.38153,127.10251],[37.38151,127.10261],[37.38145,127.10289],[37.38134,127.1034],[37.38128,127.10358],[37.3812,127.10377],[37.38111,127.10398],[37.38094,127.10431],[37.38039,127.10532],[37.38034,127.10543],[37.38013,127.10595],[37.37998,127.10645],[37.37968,127.10723],[37.37952,127.1076],[37.37922,127.10801],[37.37892,127.10837],[37.3787,127.10856],[37.37869,127.10857],[37.37861,127.10867],[37.37849,127.10881],[37.37837,127.10894],[37.37826,127.10905],[37.37815,127.10914],[37.37812,127.10916],[37.37784,127.10949],[37.37727,127.11014],[37.37721,127.11021],[37.3771,127.11033],[37.377,127.11024],[37.37693,127.11019],[37.3769,127.11017],[37.37682,127.11011],[37.37674,127.11007],[37.37667,127.11002],[37.37658,127.10999],[37.3765,127.10995],[37.37642,127.10992],[37.37635,127.1099],[37.37627,127.10987],[37.3762,127.10985],[37.37611,127.10983],[37.37603,127.10982],[37.37595,127.10981],[37.37586,127.1098],[37.37553,127.1098],[37.37525,127.1098],[37.37396,127.10979],[37.37378,127.10977],[37.37363,127.10956],[37.37312,127.10882],[37.37286,127.10853],[37.37262,127.10832],[37.37244,127.10818],[37.37228,127.10812],[37.37209,127.10806],[37.37171,127.10797],[37.36868,127.10804],[37.36854,127.10805],[37.36838,127.10805],[37.36663,127.10805],[37.3661,127.10805],[37.36561,127.10806],[37.36364,127.10806],[37.36342,127.10806],[37.36343,127.10823],[37.36364,127.10822],[37.36477,127.10823],[37.3661,127.10821],[37.36653,127.10819],[37.367,127.10819]]}};
+const NAMES={stn:'판교역',tv:'판교테크노밸리',jeongja:'정자역'};
+const map=L.map('map',{zoomControl:false,attributionControl:true,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,boxZoom:false,keyboard:false}).setView(ORIGIN,15);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+const icon=(cls,html)=>L.divIcon({className:'',html:'<div class="'+cls+'">'+(html||'')+'</div>',iconSize:[0,0]});
+L.marker(ORIGIN,{icon:icon('lbl','CORE45 · 삼평동 637-2'),interactive:false}).addTo(map);
+let cur=null,line=null,dst=null,dstl=null,rider=null,cum=[];
+function setDest(k){if(cur===k)return;cur=k;const c=[ORIGIN,...ROUTES[k].coords];
+  [line,dst,dstl].forEach(x=>x&&map.removeLayer(x));
+  line=L.polyline(c,{color:'#0A7F60',weight:6,opacity:1,lineCap:'round',lineJoin:'round'}).addTo(map);
+  dst=L.marker(c[c.length-1],{icon:icon('dst'),interactive:false}).addTo(map);
+  dstl=L.marker(c[c.length-1],{icon:icon('dstl',NAMES[k]),interactive:false}).addTo(map);
+  if(!rider)rider=L.marker(ORIGIN,{icon:L.divIcon({className:'',html:'<div class="rider"><i></i><b></b></div>',iconSize:[0,0]}),interactive:false,zIndexOffset:1000}).addTo(map);
+  cum=[0];for(let i=1;i<c.length;i++)cum.push(cum[i-1]+map.distance(c[i-1],c[i]));
+  map.fitBounds(line.getBounds(),{paddingTopLeft:[70,90],paddingBottomRight:[70,60]});}
+function setP(p){if(!cur)return;const c=[ORIGIN,...ROUTES[cur].coords],T=cum[cum.length-1]*p;let i=1;while(i<c.length-1&&cum[i]<T)i++;const s=cum[i]-cum[i-1]||1,f=Math.max(0,Math.min(1,(T-cum[i-1])/s));rider.setLatLng([c[i-1][0]+(c[i][0]-c[i-1][0])*f,c[i-1][1]+(c[i][1]-c[i-1][1])*f]);}
+window.addEventListener('message',e=>{const d=e.data;if(!d||d.type!=='hx-map')return;setDest(d.dest);setP(d.p);});
+parent.postMessage({type:'hx-map-ready'},'*');
+</script></body></html>
