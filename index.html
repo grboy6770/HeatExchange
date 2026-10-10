@@ -148,7 +148,7 @@ input[type=range]{accent-color:#0A7F60;}
             <div style="font-size:15px;color:#5B6662;">실시간 서버 폐열</div>
             <div style="display:flex;align-items:baseline;gap:6px;"><div style="font-size:40px;font-weight:600;letter-spacing:-.02em;">{{ heatKw }}</div><div style="font-size:17px;color:#5B6662;">kW</div><div style="margin-left:14px;font-size:15px;color:#5B6662;">AI 부하 <b style="color:#0A7F60;font-weight:600;">{{ aiLoad }}%</b></div></div>
           </div>
-          <div style="margin-left:auto;max-width:330px;font-family:Pretendard,sans-serif;font-size:16px;font-weight:600;line-height:1.45;text-align:right;text-wrap:pretty;">{{ heatNow }}</div>
+          <div style="margin-left:auto;max-width:330px;font-family:Pretendard,sans-serif;font-size:16px;font-weight:600;line-height:1.45;text-align:right;text-wrap:pretty;white-space:pre;">{{ heatNow }}</div>
         </div>
         <div style="position:relative;height:96px;">
           <div style="position:absolute;inset:0;border-radius:10px;background:#5FE3BE;opacity:{{ heatOpacity }};transition:opacity 1.2s;"></div>
@@ -723,7 +723,7 @@ const CROPS=[
 {id:'celery',name:'셀러리',en:'Celery',unit:'170g',base:4100,a:-0.1,gh:'D',c:'#C97A5E',ch:'셀'},
 {id:'mint',name:'민트',en:'Mint',unit:'20g',base:3000,a:0.2,gh:'D',c:'#4E9A6E',ch:'민'},
 {id:'arugula',name:'루꼴라',en:'Arugula',unit:'100g',base:4000,a:-0.2,gh:'D',c:'#5A7F96',ch:'루'}
-].map(c=>({...c,img:'crops/'+c.id+'.svg'}));
+].sort((x,y)=>x.name.localeCompare(y.name,'ko')).map(c=>({...c,img:'crops/'+c.id+'.svg'}));
 const GH={A:{name:'고온 온실',en:'Hot house',range:'28–32°C',t0:26,k:6},B:{name:'중온 온실',en:'Temperate',range:'20–24°C',t0:19,k:4},C:{name:'저온 온실',en:'Cool house',range:'15–18°C',t0:14,k:3},D:{name:'아쿠아포닉스',en:'Aquaponics',range:'수온 22–26°C',t0:21,k:4}};
 const ADDR=[
 {key:'stn',name:'판교역',en:'Pangyo Stn.',dist:'0.9km',km:0.9,min:6},
@@ -837,7 +837,7 @@ class Component extends DCLogic {
     const filters=[['all','전체']].concat(Object.entries(GH).map(([k,g])=>[k,g.name])).map(([k,l])=>{const on=s.filter===k;return {label:l,bg:on?'#121816':'#FBFCFC',fg:on?'#fff':'#121816',border:on?'#121816':'#D3D9D7',onClick:()=>this.setState({filter:k})};});
     const rows=CROPS.filter(c=>s.filter==='all'||c.gh===s.filter).map(rowOf);
     const heatLine=mkLine(m.heat,720,96,8,0,100);
-    const heatNow=H>=65?'폐열이 많아요. 토마토·망고 등 고온 작물이 저렴해지는 중':H<=35?'폐열이 적어요. 상추·브로콜리 등 저온 작물이 저렴해지는 중':'폐열 공급이 안정적이에요. 시세 보합';
+    const heatNow=H>=65?'폐열이 많아요. 토마토·망고 등\n고온 작물이 저렴해지는 중':H<=35?'폐열이 적어요. 상추·브로콜리 등\n저온 작물이 저렴해지는 중':'폐열 공급이 안정적이에요.\n시세 보합';
     const shares={A:40+H*0.1,B:25,C:Math.max(4,14-H*0.08),D:25};const tot=Object.values(shares).reduce((a,b)=>a+b,0);
     const ghCards=Object.entries(GH).map(([id,g])=>{const sh=Math.round(shares[id]/tot*100);const temp=(g.t0+g.k*H/100).toFixed(1);
       return {id,name:g.name,en:g.en,range:g.range,temp,label:id==='D'?'수온':'기온',share:sh,bar:sh*2,kw:Math.round(heatKw*sh/100),
